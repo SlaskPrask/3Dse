@@ -224,3 +224,5 @@ Library Debug/
 Library Release/
 Release/
 x64/
+/SE3D/SE3D.VC.db
+/SE3D/SE3D.VC.VC.opendb
