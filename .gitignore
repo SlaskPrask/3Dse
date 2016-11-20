@@ -210,3 +210,17 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+
+
+SE3D/log.txt
+SE3D/Debug/
+SE3D/Library Debug/
+SE3D/Library Release/
+SE3D/Release/
+SE3D/X64/
+*.tlog
+Debug/
+Library Debug/
+Library Release/
+Release/
+x64/
