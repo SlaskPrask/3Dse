@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{841C4C7C-3377-4C07-B341-B2FD382D8143}</ProjectGuid>
-    <RootNamespace>My3Dse</RootNamespace>
+    <ProjectGuid>{15155606-0B7F-468D-BC67-7AA9DD5C9E57}</ProjectGuid>
+    <RootNamespace>SE3D</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
