@@ -68,3 +68,5 @@ default texture
 const &everything
 
 dlog about unloaded resources
+
+font realignment required!

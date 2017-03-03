@@ -219,6 +219,7 @@ SE3D/Library Release/
 SE3D/Release/
 SE3D/X64/
 *.tlog
+*.VC.opendb
 Debug/
 Library Debug/
 Library Release/
