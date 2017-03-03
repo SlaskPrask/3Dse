@@ -905,7 +905,7 @@ void EngineLayer::drawPoly(double x1,double y1,double x2,double y2,double x3,dou
 
 void EngineLayer::drawSpriteFinal(Sprite* sprite,double x,double y,double w,double h,double texx1,double texy1,double texx2,double texy2,double texx3,double texy3,double texx4,double texy4,double rot,double r,double g,double b,double a)
 {
-	ssetRotation(rot,w,h);
+	setRotation(rot,w,h);
 	
 	setColor(r,g,b,a);
 	
