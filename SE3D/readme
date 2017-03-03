@@ -1,0 +1,5 @@
+Current deployment (no lib):
+use release build
+no -DDEBUG
+include dlls: sfml-graphics-2.dll sfml-system-2.dll sfml-window-2.dll 
+freetype271.dll msvcp140.dll vcruntime140.dll

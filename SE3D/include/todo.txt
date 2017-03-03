@@ -1,0 +1,70 @@
+main flow is java
+ remove getenv since all calls originate from java thread we already know env for it
+
+ignore mouse on black borders
+ if (in black border)
+  mouseShroud[i]=1; if (pressed) add as release event (inbounds xy)
+  ;
+  in move if (mouseShroud[i]&&not in black border)
+  add as a press event (inbounds xy)
+
+persistent scenes
+ oot pause menu like
+ objects tied to scene and not engine
+
+separate font shader?
+ borders
+
+function to escape default draw stuff and use custom gl instead
+ a funciton to return to default draw stuff
+
+make void game() work with extern, somehow..
+ make sikal into a single library (not like i need one but it should be possible because of the extern)
+ do it:
+  void game();
+  #include "sikal.h" //will set run pointer to game (or main, from which you could call se3d::run... sounds delicious)
+  void game(){}
+   OH how about:
+    #ifdef ANDROID
+     int main();
+     
+    #endif
+
+sensors
+ accelerometer
+ gravity
+ magnetometer
+ gyroscope
+ light
+ proximity
+vibration
+battery
+signal
+volume buttons
+ read states
+ disable volume control
+
+ads
+ admob
+ build, edit, left tab, ads
+
+other mouse buttons and wheel on touchables
+
+fonts don't need to be loaded in powers of two
+ android and engine
+
+inherit tags
+collision object rotation variable (pos&orient combined)
+initial object positioning thing (hitbox things)
+try catch unable to load font asset and return null
+
+gamepad
+
+show message compability
+
+default font
+default texture
+
+const &everything
+
+dlog about unloaded resources

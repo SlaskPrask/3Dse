@@ -13,10 +13,234 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Android">
+      <UniqueIdentifier>{94593916-d585-4fdc-a783-5ca8aa729213}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test">
+      <UniqueIdentifier>{3403ec35-c6ae-4af0-b661-8ad6c787e399}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Standalone">
+      <UniqueIdentifier>{ed05f516-0b58-40ec-98d5-3854b8e6698d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Back">
+      <UniqueIdentifier>{f22a3460-4fde-4749-90dd-a8417edc97a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Back">
+      <UniqueIdentifier>{6506568f-3d01-4cd6-b752-f494c95228e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test\Game">
+      <UniqueIdentifier>{143b4894-758a-42f6-ae84-3f35abd0957f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Important.h">
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\enginecallback.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\enginelayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\enginenamespace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\sound.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\tag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\touchable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\platform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\collision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\hitbox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\collisionobject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\androidnames.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\animationframe.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\depthitem.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\animationdata.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\animation.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\enginenamespaceext.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\enginesettings.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\enginewrapper.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\font.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\linkedlist.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\listhandle.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\platformgraphics.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\se3d.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\shader.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\sprite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\resource.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\resourceset.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\log.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\board.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\game.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\level.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\piece.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\enginelayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\enginelayerimplementations.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\enginenamespace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\run.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\sound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\sprite.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\tag.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\touchable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\android\android.cpp">
+      <Filter>Source Files\Android</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\android\androidcallback.cpp">
+      <Filter>Source Files\Android</Filter>
+    </ClCompile>
+    <ClCompile Include="source\standalone\callback.cpp">
+      <Filter>Source Files\Standalone</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\collision.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\hitbox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\collisionobject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\animation.cpp">
+      <Filter>Source Files\Back</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\animationdata.cpp">
+      <Filter>Source Files\Back</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\depthitem.cpp">
+      <Filter>Source Files\Back</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\enginenamespaceext.cpp">
+      <Filter>Source Files\Back</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\enginewrapper.cpp">
+      <Filter>Source Files\Back</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\font.cpp">
+      <Filter>Source Files\Back</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\log.cpp">
+      <Filter>Source Files\Back</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\resource.cpp">
+      <Filter>Source Files\Back</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\resourceset.cpp">
+      <Filter>Source Files\Back</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\loader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\board.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\game.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\level.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\main.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\piece.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
