@@ -905,7 +905,7 @@ void EngineLayer::drawPoly(double x1,double y1,double x2,double y2,double x3,dou
 
 void EngineLayer::drawSpriteFinal(Sprite* sprite,double x,double y,double w,double h,double texx1,double texy1,double texx2,double texy2,double texx3,double texy3,double texx4,double texy4,double rot,double r,double g,double b,double a)
 {
-	setRotation(rot,w,h);
+	ssetRotation(rot,w,h);
 	
 	setColor(r,g,b,a);
 	
@@ -937,6 +937,7 @@ void EngineLayer::drawSpriteFinal(Sprite* sprite,double x,double y,double w,doub
 void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,double size,double lineSpacing,double r,double g,double b,double a,int align)
 {
 	setColor(r,g,b,a);
+	setRotation(0);
 	
 	GLfloat lineHeight=(GLfloat)font->lineh;
 	GLfloat scale=font->ratio;
