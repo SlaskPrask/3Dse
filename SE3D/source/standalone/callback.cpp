@@ -93,7 +93,7 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	if (FT_New_Face(*lib,s.c_str(),0,&face))
 		return 0;
 
-	FT_Set_Char_Size(face,size<<6,size<<6,77,77);//73.5,73.5
+	FT_Set_Char_Size(face,size<<6,size<<6,72,72);//73.5,73.5
 	float meas[3];//descent,lineh,ascent
 	float charwidth[_FONT_CHARACTERS];
 
@@ -123,8 +123,8 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 		charwidth[c]=(float)bmp->width;
 		if (charwidth[c]>cwidth)
 			cwidth=charwidth[c];
-		if (bmp->rows>cheight)
-			cheight=bmp->rows;
+		/*if (bmp->rows>cheight)
+			cheight=bmp->rows;*/ //doesn't do anything
 
 		charwidth[c]=(GLfloat)(face->glyph->advance.x>>6);
 
@@ -143,6 +143,9 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 		charsize*=2;
 	int texsize=charsize*16;
 
+	int xoff=(charsize-cwidth)/2;
+	int yoff=(charsize-cheight)/2;
+
 	GLubyte *data=new GLubyte[texsize*texsize*2];//double bytes because contains color byte and alpha byte (c,a)GL_LUMINANCE_ALPHA not like 4x (r,g,b,a)GL_RGBA
 
 	for (int c=0;c<_FONT_SET_CHARACTERS;c++)
@@ -156,8 +159,8 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 		bmpg=(FT_BitmapGlyph)glyph;
 		bmp=&bmpg->bitmap;
 
-		int offx=(int)((face->glyph->metrics.horiBearingX>>6)+charsize/3.0f);
-		int offy=(int)(charsize-1-meas[0]-1-(face->glyph->metrics.horiBearingY>>6))-charsize/3.0f;
+		int offx=(int)((face->glyph->metrics.horiBearingX>>6)+xoff);
+		int offy=(int)(charsize-1-meas[0]-1-(face->glyph->metrics.horiBearingY>>6)-yoff);
 
 		int ox=1+offx+face->glyph->bitmap_left;
 		int oy=1+offy+face->glyph->bitmap_top;
@@ -194,7 +197,7 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	data[i*2+1]=0x88;
 	//*/
 
-	EngineLayer::instance()->setFontData(fnt,startc,camount,meas,charwidth,texsize);
+	EngineLayer::instance()->setFontData(fnt,startc,camount,meas,charwidth,texsize,xoff,yoff);
 	FT_Done_Face(face);
 
 	if (!threaded)

@@ -16,8 +16,8 @@ namespace _ENGINESPACE
 	{
 		return a*180.0f/M_PI;
 	}
-	double lengthdirX(double a,double x,double y);
-	double lengthdirY(double a,double x,double y);
+	double lengthdirX(double angle,double x,double y);
+	double lengthdirY(double angle,double x,double y);
 	template <class T,class F,class E>
 	inline T limit(T a,F min,E max)
 	{

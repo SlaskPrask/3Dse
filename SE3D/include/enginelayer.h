@@ -532,7 +532,10 @@ namespace _engineprivate
 		}
 		
 		//graphics
-		void setFontData(Font *font,int startc,int camount,float *meas,float *charwidth,int texsize);
+		void setFontData(Font *font,int startc,int camount,float *meas,float *charwidth,int texsize,int xoff,int yoff)
+		{
+			font->setData(startc,camount,meas,charwidth,texsize,xoff,yoff);
+		}
 		void reloadSprites();
 		void reloadFonts();
 		void listLoadedSprite(Sprite *s);

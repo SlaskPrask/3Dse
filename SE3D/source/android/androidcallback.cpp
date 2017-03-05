@@ -163,21 +163,23 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	JNIEnv *e=EngineLayer::getEnv();
 	jstring str=e->NewStringUTF(s.c_str());
 	jclass c=*EngineLayer::instance()->getAssetManager();
-	
+
 	jfloatArray measures=e->NewFloatArray(3);
+	jintArray offs=e->NewIntArray(2);
 	jfloatArray widths=e->NewFloatArray(_FONT_CHARACTERS);
 	
-	jmethodID m=e->GetStaticMethodID(c,"loadFontSetup","(Ljava/lang/String;I[F[F)I");
-	jint texsize=e->CallStaticIntMethod(c,m,str,size,measures,widths);
+	jmethodID m=e->GetStaticMethodID(c,"loadFontSetup","(Ljava/lang/String;I[F[F[I)I");
+	jint texsize=e->CallStaticIntMethod(c,m,str,size,measures,widths,offs);
 	if (texsize<=0)
 	return 0;
 
 	jfloat *meas=e->GetFloatArrayElements(measures,0);
 	jfloat *charwidth=e->GetFloatArrayElements(widths,0);
+	jint *xyoff=e->GetIntArrayElements(offs,0);
 	jintArray pixdata=e->NewIntArray(texsize*texsize);
 
-	m=e->GetStaticMethodID(c,"loadFont","(Ljava/lang/String;IIIIF[I)V");
-	e->CallStaticVoidMethod(c,m,str,size,texsize,startc,camount,meas[0],pixdata);
+	m=e->GetStaticMethodID(c,"loadFont","(Ljava/lang/String;IIIIFII[I)V");
+	e->CallStaticVoidMethod(c,m,str,size,texsize,startc,camount,meas[0],xyoff[0],xyoff[1],pixdata);
 
 	jint *pixels=e->GetIntArrayElements(pixdata,0);
 	GLubyte *data=new GLubyte[texsize*texsize*4];
@@ -197,12 +199,14 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 		data[i*4+3]=0xFF/3;//*/ //show background
 	}
 	
-	EngineLayer::instance()->setFontData(fnt,startc,camount,meas,charwidth,texsize);
+	EngineLayer::instance()->setFontData(fnt,startc,camount,meas,charwidth,texsize,xyoff[0],xyoff[1]);
 	e->ReleaseFloatArrayElements(widths,charwidth,0);
 	e->ReleaseIntArrayElements(pixdata,pixels,0);
+	e->ReleaseIntArrayElements(offs,xyoff,0);
 	e->ReleaseFloatArrayElements(measures,meas,0);
 
 	e->DeleteLocalRef(str);
+	e->DeleteLocalRef(offs);
 	e->DeleteLocalRef(measures);
 	e->DeleteLocalRef(widths);
 	e->DeleteLocalRef(pixdata);

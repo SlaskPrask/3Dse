@@ -941,6 +941,9 @@ void EngineLayer::drawSpriteFinal(Sprite* sprite,double x,double y,double w,doub
 
 void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,double size,double lineSpacing,double r,double g,double b,double a,int align)
 {
+	if (font==NULL)
+	return;
+
 	setColor(r,g,b,a);
 	setRotation(0);
 	
@@ -1036,11 +1039,6 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 	}
 	
 	restoreColor();
-}
-
-void EngineLayer::setFontData(Font *font,int startc,int camount,float *meas,float *charwidth,int texsize)
-{
-	font->setData(startc,camount,meas,charwidth,texsize);
 }
 
 void EngineLayer::setGameStartFunc(void (*func)())

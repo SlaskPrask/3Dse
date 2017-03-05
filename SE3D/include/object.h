@@ -176,6 +176,12 @@ namespace _ENGINESPACE
 		Object* unsetPersistent();
 		Object* addTag(Tag *tag);
 		Object* removeTag(Tag *tag);
+		template<class T>
+		T* at(T* t,double x,double y)//enable compability with enginenamespace
+		{
+			t->at(x,y);
+			return t;
+		}
 		Object* at(double xp,double yp);
 		inline Object* setPosition(double xp,double yp)
 		{

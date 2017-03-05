@@ -28,7 +28,7 @@ Font::Font(const std::string &file,int s,volatile bool threaded)
 	load(file,s,threaded);
 }
 
-void Font::setData(int startc,int camount,float *meas,float *charwidth,int texsize)
+void Font::setData(int startc,int camount,float *meas,float *charwidth,int texsize,int xoff,int yoff)
 {
 	for(int i=0;i<camount;i++)
 	charw[i+startc]=charwidth[i+startc];
@@ -37,9 +37,9 @@ void Font::setData(int startc,int camount,float *meas,float *charwidth,int texsi
 	ascent=meas[2];
 	w=h=texsize;
 	ratio=(double)w/16.0f/(double)size;
-	yratio=(double)w/16.0f/(double)fonth;
-	xoff=-(double)texsize/16.0f/3.0f;
-	yoff=(double)texsize/16.0f/3.0f;
+	yratio=(double)h/16.0f/(double)fonth;
+	this->xoff=-xoff;
+	this->yoff=yoff;//(double)texsize/16.0f/3.0f; //-charsize/3.0f
 }
 
 void Font::load(const std::string &file,int s,volatile bool threaded)

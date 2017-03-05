@@ -135,6 +135,7 @@
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\game.h" />
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\level.h" />
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\piece.h" />
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\point.h" />
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\androidnames.h" />
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\animation.h" />
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\animationdata.h" />
@@ -176,6 +177,7 @@
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\level.cpp" />
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\main.cpp" />
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\piece.cpp" />
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\point.cpp" />
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\android\android.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>

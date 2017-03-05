@@ -57,7 +57,7 @@ namespace _ENGINESPACE
 		void load(const std::string &file,int s=_FONT_DEFAULT_SIZE,volatile bool threaded=0);
 		void unload();
 		void init();
-		void setData(int startc,int camount,float meas[3],float *charwidth,int texsize);
+		void setData(int startc,int camount,float meas[3],float *charwidth,int texsize,int xoff,int yoff);
 		
 		public:
 		Font();
