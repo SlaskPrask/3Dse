@@ -189,6 +189,12 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 		data[i*4+1]=0xFF;
 		data[i*4+2]=0xFF;
 		data[i*4+3]=(0xFF&((pixels[i]&0xFF000000)>>24));
+
+		/*data[i*4+0]=(0xFF&((pixels[i]&0xFF000000)>>24));
+		data[i*4+1]=(0xFF&((pixels[i]&0xFF000000)>>24));
+		data[i*4+2]=(0xFF&((pixels[i]&0xFF000000)>>24));
+		if (0xFF&((pixels[i]&0xFF000000)>>24)!=0xFF)
+		data[i*4+3]=0xFF/3;//*/ //show background
 	}
 	
 	EngineLayer::instance()->setFontData(fnt,startc,camount,meas,charwidth,texsize);

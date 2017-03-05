@@ -190,6 +190,11 @@ EngineLayer::EngineLayer()
 	switchingScenes=0;
 	frameTime=1;
 	maxFrameTime=1;
+	frameMultiplier=1;
+	#ifdef DEBUG
+	debugTimeScale=1;
+	debugTimeStep=0;
+	#endif
 	handleObjDeleted=0;
 	started=0;
 	running=1;
@@ -1372,7 +1377,7 @@ EngineLayer::~EngineLayer()
 #ifdef DEBUG
 void EngineLayer::dumpObjects()
 {
-	Log::log("DUMP","OBJECTS:");
+	Log::log("Debug","OBJECTS:");
 	int i=0;
 	LinkedList<Object> *obj = objects.first();
 	while (obj)
@@ -1380,16 +1385,16 @@ void EngineLayer::dumpObjects()
 		LinkedList<Object> *nextObj= obj->getNext();
 		std::ostringstream s;
 		s << to_string(i) << ": " << ((Object*)obj)->objectName() << " (" << (Object*)obj << ")";
-		Log::log("DUMP",s.str().c_str());
+		Log::log("Debug",s.str().c_str());
 		i++;
 		obj = nextObj;
 	}
 
-	Log::log("DUMP","");
+	Log::log("Debug","");
 }
 void EngineLayer::dumpObjectDepths()
 {
-	Log::log("DUMP","OBJECT DEPTHS:");
+	Log::log("Debug","OBJECT DEPTHS:");
 	DepthItem *di,*diNext;
 	int i=0;
 	if (di=firstDepth)
@@ -1399,16 +1404,16 @@ void EngineLayer::dumpObjectDepths()
 			std::ostringstream s;
 			s << to_string(i) << ": " << di << " " << di->get()->objectName();
 			s << " (" << di->get() << ":" << di->getDepth() << ") ";
-			Log::log("DUMP",s.str().c_str());
+			Log::log("Debug",s.str().c_str());
 			i++;
 			di=diNext;
 		}
 
-	Log::log("DUMP","");
+	Log::log("Debug","");
 }
 void EngineLayer::dumpObjects(unsigned int id)
 {
-	Log::log("DUMP","OBJECTS:");
+	Log::log("Debug","OBJECTS:");
 	int i=0;
 	LinkedList<Object> *obj=objects.first();
 	while (obj)
@@ -1417,16 +1422,16 @@ void EngineLayer::dumpObjects(unsigned int id)
 		LinkedList<Object> *nextObj=obj->getNext();
 		std::ostringstream s;
 		s << to_string(i) << ": " << ((Object*)obj)->objectName() << " (" << (Object*)obj << ")";
-		Log::log("DUMP",s.str().c_str());
+		Log::log("Debug",s.str().c_str());
 		i++;
 		obj=nextObj;
 	}
 
-	Log::log("DUMP","");
+	Log::log("Debug","");
 }
 void EngineLayer::dumpDepths()
 {
-	Log::log("DUMP","DEPTHS:");
+	Log::log("Debug","DEPTHS:");
 	DepthItem *di,*diNext;
 	int i=0;
 	if (di=firstDepth)
@@ -1452,59 +1457,59 @@ void EngineLayer::dumpDepths()
 		else
 		s << " -> " << ((Object*)NULL) << "(" << ((Object*)NULL) << ":-)";
 
-		Log::log("DUMP",s.str().c_str());
+		Log::log("Debug",s.str().c_str());
 		i++;
 
 		di=diNext;
 	}
 
-	Log::log("DUMP","");
+	Log::log("Debug","");
 }
 void EngineLayer::dumpDepthQueue()
 {
-	Log::log("DUMP","DEPTH QUEUE:");
+	Log::log("Debug","DEPTH QUEUE:");
 	for (unsigned int i=0;i<depthQueue.size();i++)
 	{
 		std::ostringstream s;
 		s << to_string(i) << ": " << depthQueue[i] << " " << depthQueue[i]->_depth << "->" << depthQueue[i]->_qdepth;
-		Log::log("DUMP",s.str().c_str());
+		Log::log("Debug",s.str().c_str());
 		depthQueue[i];
 	}
 
-	Log::log("DUMP","");
+	Log::log("Debug","");
 }
 void EngineLayer::dumpDepthChangeQueue()
 {
-	Log::log("DUMP","DEPTH CHANGE QUEUE:");
+	Log::log("Debug","DEPTH CHANGE QUEUE:");
 	for (unsigned int i=0;i<depthChangeQueue.size();i++)
 	{
 		std::ostringstream s;
 		s << to_string(i) << ": " << depthChangeQueue[i] << " " << depthChangeQueue[i]->_depth << "->" << depthChangeQueue[i]->_qdepth;
-		Log::log("DUMP",s.str().c_str());
+		Log::log("Debug",s.str().c_str());
 		depthChangeQueue[i];
 	}
 
-	Log::log("DUMP","");
+	Log::log("Debug","");
 }
 void EngineLayer::dumpObj(Object *obj)
 {
 	std::ostringstream s;
 	s << "OBJECT: " << obj->objectName() << " (" << obj << ")";
-	Log::log("DUMP",s.str().c_str());
+	Log::log("Debug",s.str().c_str());
 	s.str("");
 	s << "DEPTH OBJ: " << obj->_depthItem;
-	Log::log("DUMP",s.str().c_str());
+	Log::log("Debug",s.str().c_str());
 	s.str("");
 	s << "DEPTH: " << to_string(obj->_depth) << "->" << to_string(obj->_qdepth);
-	Log::log("DUMP",s.str().c_str());
+	Log::log("Debug",s.str().c_str());
 	s.str("");
 	s << "X,Y: " << to_string(obj->x) << "," << to_string(obj->y);
-	Log::log("DUMP",s.str().c_str());
+	Log::log("Debug",s.str().c_str());
 	s.str("");
 	s << (obj->_visible?"VISIBLE":"INVISIBLE");
-	Log::log("DUMP",s.str().c_str());
+	Log::log("Debug",s.str().c_str());
 
-	Log::log("DUMP","");
+	Log::log("Debug","");
 }
 void EngineLayer::debugToggleCollision()
 {
@@ -1534,6 +1539,33 @@ void EngineLayer::debugHandler()
 		if (getKeyPress(sf::Keyboard::Key::F1))
 		if (scene)
 		scene->restart();
+
+		if (getKeyPress(sf::Keyboard::Key::Numpad0))
+		{
+			if (!(!(debugTimeScale==0.0f)^!(debugTimeStep==0)))
+			{
+				debugTimeScale=1;
+				Log::log("Debug","Time scale: Normal");
+			}
+			else
+			{
+				debugTimeScale=0;
+				Log::log("Debug","Time scale: Paused");
+			}
+			debugTimeStep=0;
+		}
+		if (getKeyPress(sf::Keyboard::Key::Add))
+		{
+			debugTimeStep++;
+			debugTimeScale=debugTimeStep<0?1.0f/(pow(2,-debugTimeStep)):pow(2,debugTimeStep);
+			Log::log("Debug",std::string("Time scale: ")+to_string(debugTimeScale));
+		}
+		if (getKeyPress(sf::Keyboard::Key::Subtract))
+		{
+			debugTimeStep--;
+			debugTimeScale=debugTimeStep<0?1.0f/(pow(2,-debugTimeStep)):pow(2,debugTimeStep);
+			Log::log("Debug",std::string("Time scale: ")+to_string(debugTimeScale));
+		}
 	}
 	else
 	if (getKeyHeld(sf::Keyboard::Key::LShift)||getKeyHeld(sf::Keyboard::Key::RShift))

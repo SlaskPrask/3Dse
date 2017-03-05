@@ -194,6 +194,9 @@ bool Object::getCollisions(std::vector<Object*> *vec)
 	return vec->size()!=0;
 }
 
+void Object::onDestroy()
+{
+}
 void Object::run()
 {
 }

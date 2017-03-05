@@ -51,4 +51,8 @@ namespace _ENGINESPACE
 	{
 		return sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
 	}
+	inline double angle(double x1,double y1,double x2,double y2)
+	{
+		return (x1-x2)==0?(y1-y2<0?270:90):radToDeg((x1-x2)>0?M_PI+atan((y2-y1)/(x1-x2)):((y2-y1<=0)?((y2-y1==0)?0:atan((y2-y1)/(x1-x2))):2*M_PI+atan((y2-y1)/(x1-x2))));
+	}
 }

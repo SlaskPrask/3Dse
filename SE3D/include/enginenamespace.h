@@ -22,7 +22,18 @@ namespace _ENGINESPACE
 	{
 		return run(0,NULL,func);
 	}
-
+	inline bool isFocusGained()
+	{
+		return EngineLayer::instance()->getFocusEvent();
+	}
+	inline bool isFocusLost()
+	{
+		return EngineLayer::instance()->getUnfocusEvent();
+	}
+	inline bool isWindowResized()
+	{
+		return EngineLayer::instance()->getResizeEvent();
+	}
 	inline void loaderAdd(ResourceSet *set)
 	{
 		EngineLayer::instance()->loaderAdd(set);
@@ -344,7 +355,15 @@ namespace _ENGINESPACE
 	}
 	inline double delta()
 	{
-		return getFrameTime();
+		return getFrameTime()*EngineLayer::instance()->getTimeScale();
+	}
+	inline double getTimeScale()
+	{
+		return EngineLayer::instance()->getTimeScale();
+	}
+	inline void setTimeScale(double scale=1)
+	{
+		EngineLayer::instance()->setTimeScale(scale);
 	}
 	inline void showMessage(const std::string &str)
 	{
@@ -657,7 +676,7 @@ namespace _ENGINESPACE
 			Equal,
 			Dash,
 			Space,
-			Return,
+			Enter,
 			BackSpace,
 			Tab,
 			PageUp,PageDown,

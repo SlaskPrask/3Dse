@@ -51,7 +51,7 @@ GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *heig
 	GLuint tex=0;
 	glGenTextures(1,&tex);
 	EngineLayer::printGLErrors("Texture creation");
-	
+
 	glBindTexture(GL_TEXTURE_2D,tex);
 	DEBUGFUNC(EngineLayer::printGLErrors("Texture bind"));
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
@@ -86,21 +86,22 @@ GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *heig
 GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,int startc,int camount,bool threaded,GLuint *destination)
 {
 	FT_Library *lib=EngineLayer::instance()->getFontLib();
-	if(!lib)
-	return 0;
+	if (!lib)
+		return 0;
 
 	FT_Face face;
 	if (FT_New_Face(*lib,s.c_str(),0,&face))
-	return 0;
+		return 0;
 
-	FT_Set_Char_Size(face,size<<6,size<<6,72,72);//73.5,73.5
+	FT_Set_Char_Size(face,size<<6,size<<6,77,77);//73.5,73.5
 	float meas[3];//descent,lineh,ascent
 	float charwidth[_FONT_CHARACTERS];
 
-	meas[0]=(float)(face->size->metrics.descender>>6);
-	meas[1]=(float)(face->size->metrics.height>>6);//bottom+top
-	//meas[1]=(face->bbox.yMax-face->bbox.yMin)>>6;//bottom+top
+	meas[0]=-(float)(face->size->metrics.descender>>6);
+	//meas[1]=(float)(face->size->metrics.height>>6);//bottom+top
+												   //meas[1]=(face->bbox.yMax-face->bbox.yMin)>>6;//bottom+top
 	meas[2]=(float)(face->size->metrics.ascender>>6);
+	meas[1]=meas[0]+meas[2];
 
 	double cwidth=0;
 	double cheight=0;
@@ -108,12 +109,12 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	FT_Glyph glyph;
 	FT_BitmapGlyph bmpg;
 	FT_Bitmap *bmp;
-	for(int c=0;c<_FONT_CHARACTERS;c++)
+	for (int c=0;c<_FONT_CHARACTERS;c++)
 	{
 		if (FT_Load_Glyph(face,FT_Get_Char_Index(face,c),FT_LOAD_DEFAULT))
-		return 0;
+			return 0;
 		if (FT_Get_Glyph(face->glyph,&glyph))
-		return 0;
+			return 0;
 
 		FT_Glyph_To_Bitmap(&glyph,ft_render_mode_normal,0,1);
 		bmpg=(FT_BitmapGlyph)glyph;
@@ -121,9 +122,9 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 
 		charwidth[c]=(float)bmp->width;
 		if (charwidth[c]>cwidth)
-		cwidth=charwidth[c];
+			cwidth=charwidth[c];
 		if (bmp->rows>cheight)
-		cheight=bmp->rows;
+			cheight=bmp->rows;
 
 		charwidth[c]=(GLfloat)(face->glyph->advance.x>>6);
 
@@ -136,30 +137,27 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	int cellh=(int)cheight+2;
 
 	int cellsize=(cellw>cellh?cellw:cellh);
-	//if (cellsize<0||cellsize>180)
 
 	int charsize=1;
 	while (charsize<cellsize)
-	charsize*=2;
+		charsize*=2;
 	int texsize=charsize*16;
 
 	GLubyte *data=new GLubyte[texsize*texsize*2];//double bytes because contains color byte and alpha byte (c,a)GL_LUMINANCE_ALPHA not like 4x (r,g,b,a)GL_RGBA
 
-	int globalYoff=charsize/8;
-
 	for (int c=0;c<_FONT_SET_CHARACTERS;c++)
 	{
 		if (FT_Load_Glyph(face,FT_Get_Char_Index(face,c),FT_LOAD_DEFAULT))
-		return 0;
+			return 0;
 		if (FT_Get_Glyph(face->glyph,&glyph))
-		return 0;
+			return 0;
 
 		FT_Glyph_To_Bitmap(&glyph,ft_render_mode_normal,0,1);
 		bmpg=(FT_BitmapGlyph)glyph;
 		bmp=&bmpg->bitmap;
 
 		int offx=(int)((face->glyph->metrics.horiBearingX>>6)+charsize/3.0f);
-		int offy=(int)(-2+meas[1]-(face->glyph->metrics.horiBearingY>>6)-globalYoff);
+		int offy=(int)(charsize-1-meas[0]-1-(face->glyph->metrics.horiBearingY>>6))-charsize/3.0f;
 
 		int ox=1+offx+face->glyph->bitmap_left;
 		int oy=1+offy+face->glyph->bitmap_top;
@@ -170,7 +168,7 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 		{
 			//set two neighboring containers the same (c,a)
 			if (i<ox||i>=ox+(int)bmp->width
-			||  j<oy||j>=oy+(int)bmp->rows)
+				||  j<oy||j>=oy+(int)bmp->rows)
 			{
 				data[(py+px+i+j*(texsize))*2]=0xFF;
 				data[(py+px+i+j*(texsize))*2+1]=0;
@@ -196,15 +194,13 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	data[i*2+1]=0x88;
 	//*/
 
-	meas[1]/=2.0f;//this fixes everything?
-	meas[1]+=globalYoff+1;
 	EngineLayer::instance()->setFontData(fnt,startc,camount,meas,charwidth,texsize);
 	FT_Done_Face(face);
 
 	if (!threaded)
 	{
 		GLuint tex=0;
-		
+
 		_engine::generateTexture(&tex,texsize,texsize,data,GL_LUMINANCE_ALPHA);
 
 		delete[] data;

@@ -162,8 +162,8 @@ std::string _ENGINESPACE::getKeyName(int keycode)
 			return "=";
 		case _ENGINESPACE::Key::Space:
 			return "Space";
-		case _ENGINESPACE::Key::Return:
-			return "Return";
+		case _ENGINESPACE::Key::Enter:
+			return "Enter";
 		case _ENGINESPACE::Key::BackSpace:
 			return "Backspace";
 		case _ENGINESPACE::Key::Tab:

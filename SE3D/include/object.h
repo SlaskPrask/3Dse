@@ -146,7 +146,8 @@ namespace _ENGINESPACE
 		const double &x;
 		const double &y;
 		Object();
-		
+
+		virtual void onDestroy();
 		inline bool isPersistent()
 		{
 			return _persistent;
@@ -207,7 +208,8 @@ namespace _ENGINESPACE
 		}
 		inline void destroy()
 		{
-			_destroyed = true;
+			_destroyed=1;
+			onDestroy();
 		}
 		int addCollisionBox(double px,double py,double w,double h);
 		int addCollisionCicle(double px,double py,double r);

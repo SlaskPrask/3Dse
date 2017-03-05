@@ -51,9 +51,6 @@
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\sound.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\tag.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\touchable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -141,6 +138,15 @@
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\piece.h">
       <Filter>Test\Game</Filter>
     </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\button.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\tag.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\falling.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\camera.cpp">
@@ -165,9 +171,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\sprite.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\tag.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\touchable.cpp">
@@ -237,6 +240,15 @@
       <Filter>Test\Game</Filter>
     </ClCompile>
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\piece.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\button.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\tag.cpp">
+      <Filter>Source Files\Back</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\falling.cpp">
       <Filter>Test\Game</Filter>
     </ClCompile>
   </ItemGroup>

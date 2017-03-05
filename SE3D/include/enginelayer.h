@@ -140,7 +140,11 @@ namespace _engineprivate
 		Collision *masterCollision;
 		Scene *scene;
 		bool switchingScenes;
-		double frameTime,maxFrameTime;
+		double frameTime,maxFrameTime,frameMultiplier;
+		#ifdef DEBUG
+		double debugTimeScale;
+		int debugTimeStep;
+		#endif
 		Object *handleObj;
 		bool handleObjDeleted;
 		std::string resDirectory,workingDirectory;
@@ -354,6 +358,21 @@ namespace _engineprivate
 		inline double getFrameTime()
 		{
 			return frameTime;
+		}
+		#ifndef DEBUG
+		inline double getTimeScale()
+		{
+			return frameMultiplier;
+		}
+		#else
+		inline double getTimeScale()
+		{
+			return frameMultiplier*debugTimeScale;
+		}
+		#endif
+		inline void setTimeScale(double d)
+		{
+			frameMultiplier=d;
 		}
 		inline bool sceneExiting(Scene *scn)
 		{
@@ -575,6 +594,18 @@ namespace _engineprivate
 		double getCameraY();
 		double getCameraW();
 		double getCameraH();
+		inline bool getFocusEvent()
+		{
+			return focusGained;
+		}
+		inline bool getUnfocusEvent()
+		{
+			return focusLost;
+		}
+		inline bool getResizeEvent()
+		{
+			return windowResized;
+		}
 		void drawBegin();
 		void drawEnd();
 		#ifndef ANDROID

@@ -110,7 +110,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>..\Dependencies\lib\glew32s.lib;..\Dependencies\lib\freeglut.lib;..\Dependencies\lib\sfml-main.lib;..\Dependencies\lib\sfml-system.lib;..\Dependencies\lib\sfml-window.lib;..\Dependencies\lib\sfml-graphics.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
     </Link>
@@ -130,6 +130,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\board.h" />
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\button.h" />
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\falling.h" />
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\game.h" />
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\level.h" />
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\piece.h" />
@@ -168,6 +170,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\board.cpp" />
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\button.cpp" />
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\falling.cpp" />
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\game.cpp" />
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\level.cpp" />
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\main.cpp" />
