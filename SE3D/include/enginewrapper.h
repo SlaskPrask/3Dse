@@ -14,7 +14,7 @@ namespace _ENGINESPACE
 namespace _engineprivate
 {
 	template <typename T>
-	std::string to_string(T value)
+	std::string to_string(const T &value)
 	{
 		std::ostringstream os;
 		os<<value;
@@ -39,4 +39,19 @@ namespace _engine
 	}
 	bool isObjectDestroyed(Object* o);
 	void generateTexture(GLuint *destination,int texwidth,int texheight,GLubyte *data,GLenum type);
+
+	struct MainFunction
+	{
+		inline static int(*mainFunction(int(*f)(int,char**)=NULL))(int,char**)
+		{
+			static int(*mainf)(int,char**)=NULL;
+			if (f!=NULL)
+				mainf=f;
+			return mainf;
+		}
+		MainFunction(int(*f)(int,char**))
+		{
+			mainFunction(f);
+		}
+	};
 }

@@ -150,6 +150,18 @@
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\point.h">
       <Filter>Test\Game</Filter>
     </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\breaking.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\fade.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\intro.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\intrologo.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\camera.cpp">
@@ -255,6 +267,18 @@
       <Filter>Test\Game</Filter>
     </ClCompile>
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\point.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\breaking.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\fade.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\intro.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\intrologo.cpp">
       <Filter>Test\Game</Filter>
     </ClCompile>
   </ItemGroup>

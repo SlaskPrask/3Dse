@@ -8,7 +8,53 @@ using namespace _ENGINESPACE;
 
 void CallbackSetTitle(const std::string &s)
 {
-	/*enoty, handled on the inside*/
+	/*empty, handled on the inside*/
+}
+
+bool _engineprivate::CallbackExistsFile(const std::string &f)
+{
+	bool ret=0;
+	std::ifstream file(f);
+	if (file.is_open())
+	{
+		ret=file.good();
+		file.close();
+	}
+	return ret;
+}
+
+bool _engineprivate::CallbackDeleteFile(const std::string &f)
+{
+	return (!std::remove(f.c_str()));
+}
+
+bool _engineprivate::CallbackWriteFile(const std::string &f,const std::string &s)
+{
+	std::ofstream file;
+
+	file.open(f,std::ios_base::binary);
+	if (file.is_open())
+	{
+		file << s;
+		file.close();
+		return 1;
+	}
+	return 0;
+}
+
+bool _engineprivate::CallbackReadFile(const std::string &f,std::string *s)
+{
+	std::ifstream file;
+
+	file.open(f);
+	if (file.is_open(),std::ios_base::binary)
+	{
+		std::string content((std::istreambuf_iterator<char>(file)),(std::istreambuf_iterator<char>()));
+		file.close();
+		*s=content;
+		return 1;
+	}
+	return 0;
 }
 
 void _engineprivate::CallbackPrintLog(const std::string &s)
@@ -38,6 +84,7 @@ GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *heig
 	sf::Image image;
 	if (!image.loadFromFile(s))
 	{
+		Log::error("Resources",std::string("Unable to load image file \"")+s+"\"");
 		return 0;
 	}
 	*width = image.getSize().x;
@@ -87,11 +134,17 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 {
 	FT_Library *lib=EngineLayer::instance()->getFontLib();
 	if (!lib)
+	{
+		Log::error("Resources","Unable to load font library");
 		return 0;
+	}
 
 	FT_Face face;
 	if (FT_New_Face(*lib,s.c_str(),0,&face))
+	{
+		Log::error("Resources",std::string("Unable to load font file \"")+s+"\"");
 		return 0;
+	}
 
 	FT_Set_Char_Size(face,size<<6,size<<6,72,72);//73.5,73.5
 	float meas[3];//descent,lineh,ascent
@@ -112,9 +165,15 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	for (int c=0;c<_FONT_CHARACTERS;c++)
 	{
 		if (FT_Load_Glyph(face,FT_Get_Char_Index(face,c),FT_LOAD_DEFAULT))
+		{
+			Log::error("Resources",std::string("Unable to load font character ")+to_string(c)+" from \""+s+"\" while initializing");
 			return 0;
+		}
 		if (FT_Get_Glyph(face->glyph,&glyph))
+		{
+			Log::error("Resources",std::string("Unable to get font character ")+to_string(c)+" data from \""+s+"\" while initializing");
 			return 0;
+		}
 
 		FT_Glyph_To_Bitmap(&glyph,ft_render_mode_normal,0,1);
 		bmpg=(FT_BitmapGlyph)glyph;
@@ -143,17 +202,23 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 		charsize*=2;
 	int texsize=charsize*16;
 
-	int xoff=(charsize-cwidth)/2;
-	int yoff=(charsize-cheight)/2;
+	int xoff=(int)((charsize-cwidth)/2);
+	int yoff=(int)((charsize-cheight)/2);
 
 	GLubyte *data=new GLubyte[texsize*texsize*2];//double bytes because contains color byte and alpha byte (c,a)GL_LUMINANCE_ALPHA not like 4x (r,g,b,a)GL_RGBA
 
-	for (int c=0;c<_FONT_SET_CHARACTERS;c++)
+	for (int c=0;c<camount;c++)
 	{
-		if (FT_Load_Glyph(face,FT_Get_Char_Index(face,c),FT_LOAD_DEFAULT))
+		if (FT_Load_Glyph(face,FT_Get_Char_Index(face,c+startc),FT_LOAD_DEFAULT))
+		{
+			Log::error("Resources",std::string("Unable to load font character ")+to_string(c+startc)+" from \""+s+"\"");
 			return 0;
+		}
 		if (FT_Get_Glyph(face->glyph,&glyph))
+		{
+			Log::error("Resources",std::string("Unable to get font character ")+to_string(c+startc)+" data from \""+s+"\"");
 			return 0;
+		}
 
 		FT_Glyph_To_Bitmap(&glyph,ft_render_mode_normal,0,1);
 		bmpg=(FT_BitmapGlyph)glyph;

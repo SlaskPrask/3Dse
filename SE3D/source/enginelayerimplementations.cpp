@@ -110,9 +110,9 @@ EngineLayer::EngineLayer()
 	widthRatio=heightRatio=1;
 	dominantRatio=0;
 	resDirectory="";
-	workingDirectory="./";
+	workDirectory="./";
 	
-	GLfloat vnear=1,vfar=-1,vtop=0,vleft=0,vright=width,vbottom=height;
+	GLfloat vnear=1.0f,vfar=-1.0f,vtop=0.0f,vleft=0.0f,vright=(GLfloat)width,vbottom=(GLfloat)height;
 	ortho[0]=2.0f/(vright-vleft);
 	ortho[1]=0;
 	ortho[2]=0;
@@ -129,12 +129,12 @@ EngineLayer::EngineLayer()
 	ortho[13]=0;
 	ortho[14]=0;
 	ortho[15]=1;
-	rot[0]=cos(0);
-	rot[1]=-sin(0);
+	rot[0]=(GLfloat)cos(0);
+	rot[1]=-(GLfloat)sin(0);
 	rot[2]=0;
 	rot[3]=0;
-	rot[4]=sin(0);
-	rot[5]=cos(0);
+	rot[4]=(GLfloat)sin(0);
+	rot[5]=(GLfloat)cos(0);
 	rot[6]=0;
 	rot[7]=0;
 	rot[8]=0;
@@ -247,10 +247,10 @@ int EngineLayer::runGame(int argc,char* argv[])
 	instance()->state.windowResized=1;
 	if (argc>0)
 	{
-		instance()->workingDirectory=getDirectory(argv[0]);
-		if (workingDirectory=="")
-		workingDirectory="./";
-		DEBUGFUNC(Log::log("Engine",std::string("Working directory: ")+workingDirectory));
+		instance()->workDirectory=getDirectory(argv[0]);
+		if (workDirectory=="")
+		workDirectory="./";
+		DEBUGFUNC(Log::log("Engine",std::string("Working directory: ")+workDirectory));
 		for (int i=1;i<argc-1;i++)
 		instance()->launchParameter(argv[i]);
 	}
@@ -280,11 +280,16 @@ std::string EngineLayer::resourceDirectory(const std::string &file)
 	return std::string(resDirectory+file);
 }
 
+std::string EngineLayer::workingDirectory(const std::string &file)
+{
+	return std::string(workDirectory+file);
+}
+
 void EngineLayer::setResourceDirectory(const std::string &str)
 {
 	//disabled for android
 	#ifndef ANDROID
-	resDirectory=workingDirectory;
+	resDirectory=workDirectory;
 	resDirectory+=str;
 	resDirectory+='/';
 	DEBUGFUNC(Log::log("Engine",std::string("Resource directory changed to: ")+resDirectory));
@@ -328,11 +333,11 @@ void EngineLayer::setRotation(GLfloat angle,GLfloat w,GLfloat h)
 {
 	halfsize[0]=w/2.0f;
 	halfsize[1]=h/2.0f;
-	angle=angle*M_PI/180.0f;
-	rot[0]=cos(angle);
-	rot[1]=-sin(angle);
-	rot[4]=sin(angle);
-	rot[5]=cos(angle);
+	angle=(GLfloat)(angle*M_PI/180.0f);
+	rot[0]=(GLfloat)cos(angle);
+	rot[1]=-(GLfloat)sin(angle);
+	rot[4]=(GLfloat)sin(angle);
+	rot[5]=(GLfloat)cos(angle);
 	glUniformMatrix4fv(drawRotation,1,0,rot);
 	glUniform2fv(drawHalfSize,1,halfsize);
 }
@@ -689,12 +694,12 @@ void EngineLayer::setRenderSize()
 			verBars=0;
 			horBars=(regionW-activeCamera->getWidth())/2.0f;
 		}
-		setOrtho(0,0,regionW,regionH);
+		setOrtho(0,0,(GLfloat)regionW,(GLfloat)regionH);
 		DEBUGFUNC(printGLErrors("GL ortho"));
 	}
 	else
 	{
-		setOrtho(0,0,activeCamera->getWidth(),activeCamera->getHeight());
+		setOrtho(0,0,(GLfloat)activeCamera->getWidth(),(GLfloat)activeCamera->getHeight());
 		DEBUGFUNC(printGLErrors("GL ortho"));
 		regionW=activeCamera->getWidth();
 		regionH=activeCamera->getHeight();
@@ -857,26 +862,26 @@ double EngineLayer::getScreenRatio()
 
 void EngineLayer::setColorization(double r,double g,double b)
 {
-	colorizationSet[0]=r;
-	colorizationSet[1]=g;
-	colorizationSet[2]=b;
+	colorizationSet[0]=(GLfloat)r;
+	colorizationSet[1]=(GLfloat)g;
+	colorizationSet[2]=(GLfloat)b;
 	//colorizationSet[3]=0;
 	glUniform4fv(drawColorization,1,colorizationSet);
 }
 
 void EngineLayer::drawRectangle(double x,double y,double w,double h,double rot,double r,double g,double b,double a)
 {
-	setRotation(rot,w,h);
+	setRotation((GLfloat)rot,(GLfloat)w,(GLfloat)h);
 	
 	setColor(r,g,b,a);
 	
 	textured=0;
-	posTrans[0]=x;
-	posTrans[1]=y;
+	posTrans[0]=(GLfloat)x;
+	posTrans[1]=(GLfloat)y;
 	squareData[0]=squareData[4]=0;
 	squareData[1]=squareData[3]=0;
-	squareData[2]=squareData[6]=w;
-	squareData[5]=squareData[7]=h;
+	squareData[2]=squareData[6]=(GLfloat)w;
+	squareData[5]=squareData[7]=(GLfloat)h;
 	glUniform2fv(drawTrans,1,posTrans);
 	glUniform1i(drawTextured,textured);
 	glDrawArrays(GL_TRIANGLE_STRIP,0,4);
@@ -886,21 +891,21 @@ void EngineLayer::drawRectangle(double x,double y,double w,double h,double rot,d
 
 void EngineLayer::drawPoly(double x1,double y1,double x2,double y2,double x3,double y3,double rot,double r,double g,double b,double a)
 {
-	setRotation(rot);
+	setRotation((GLfloat)rot);
 	double cx=(x1+x2+x3)/3.0f;
 	double cy=(y1+y2+y3)/3.0f;
 	
 	setColor(r,g,b,a);
 	
 	textured=0;
-	posTrans[0]=cx;
-	posTrans[1]=cy;
-	squareData[0]=x1-cx;
-	squareData[1]=y1-cy;
-	squareData[2]=x2-cx;
-	squareData[3]=y2-cy;
-	squareData[4]=x3-cx;
-	squareData[5]=y3-cy;
+	posTrans[0]=(GLfloat)cx;
+	posTrans[1]=(GLfloat)cy;
+	squareData[0]=(GLfloat)(x1-cx);
+	squareData[1]=(GLfloat)(y1-cy);
+	squareData[2]=(GLfloat)(x2-cx);
+	squareData[3]=(GLfloat)(y2-cy);
+	squareData[4]=(GLfloat)(x3-cx);
+	squareData[5]=(GLfloat)(y3-cy);
 	glUniform2fv(drawTrans,1,posTrans);
 	glUniform1i(drawTextured,textured);
 	glDrawArrays(GL_TRIANGLE_STRIP,0,3);
@@ -910,25 +915,25 @@ void EngineLayer::drawPoly(double x1,double y1,double x2,double y2,double x3,dou
 
 void EngineLayer::drawSpriteFinal(Sprite* sprite,double x,double y,double w,double h,double texx1,double texy1,double texx2,double texy2,double texx3,double texy3,double texx4,double texy4,double rot,double r,double g,double b,double a)
 {
-	setRotation(rot,w,h);
+	setRotation((GLfloat)rot,(GLfloat)w,(GLfloat)h);
 	
 	setColor(r,g,b,a);
 	
 	textured=1;
-	posTrans[0]=x;
-	posTrans[1]=y;
+	posTrans[0]=(GLfloat)x;
+	posTrans[1]=(GLfloat)y;
 	squareData[0]=squareData[4]=0;
 	squareData[1]=squareData[3]=0;
-	squareData[2]=squareData[6]=w;
-	squareData[5]=squareData[7]=h;
-	texData[0]=texx1;
-	texData[1]=texy1;
-	texData[2]=texx2;
-	texData[3]=texy2;
-	texData[4]=texx3;
-	texData[5]=texy3;
-	texData[6]=texx4;
-	texData[7]=texy4;
+	squareData[2]=squareData[6]=(GLfloat)w;
+	squareData[5]=squareData[7]=(GLfloat)h;
+	texData[0]=(GLfloat)texx1;
+	texData[1]=(GLfloat)texy1;
+	texData[2]=(GLfloat)texx2;
+	texData[3]=(GLfloat)texy2;
+	texData[4]=(GLfloat)texx3;
+	texData[5]=(GLfloat)texy3;
+	texData[6]=(GLfloat)texx4;
+	texData[7]=(GLfloat)texy4;
 	glActiveTexture(GL_TEXTURE0);
 	sprite->bind();
 	glUniform1i(drawTex,0);
@@ -948,16 +953,16 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 	setRotation(0);
 	
 	GLfloat lineHeight=(GLfloat)font->lineh;
-	GLfloat scale=font->ratio;
-	GLfloat advscale=size/(double)font->size;
-	GLfloat xoff=font->xoff;
-	GLfloat yoff=font->yoff;
+	GLfloat scale=(GLfloat)font->ratio;
+	GLfloat advscale=(GLfloat)(size/(double)font->size);
+	GLfloat xoff=(GLfloat)font->xoff;
+	GLfloat yoff=(GLfloat)font->yoff;
 	
 	textured=1;
-	squareData[0]=squareData[4]=xoff*advscale;
-	squareData[1]=squareData[3]=yoff*advscale;
-	squareData[2]=squareData[6]=xoff*advscale+size*scale;
-	squareData[5]=squareData[7]=yoff*advscale+size*scale;
+	squareData[0]=squareData[4]=xoff*(GLfloat)advscale;
+	squareData[1]=squareData[3]=yoff*(GLfloat)advscale;
+	squareData[2]=squareData[6]=xoff*(GLfloat)advscale+(GLfloat)(size*scale);
+	squareData[5]=squareData[7]=yoff*(GLfloat)advscale+(GLfloat)(size*scale);
 	
 	std::vector<GLfloat> linew;
 	int c=0,lines=0;
@@ -972,7 +977,7 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 			if (c<0||c>=_FONT_CHARACTERS)
 			continue;
 			
-			offset+=font->charw[c];
+			offset+=(GLfloat)font->charw[c];
 		}
 		linew.push_back(offset*advscale);
 		lines++;
@@ -1010,22 +1015,22 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 			{
 				default:
 				case _FONT_ALIGN_LEFT:
-					posTrans[0]=x;
+					posTrans[0]=(GLfloat)x;
 					break;
 				case _FONT_ALIGN_MIDDLE:
-					posTrans[0]=x-linew[line]/2.0f;
+					posTrans[0]=(GLfloat)x-linew[line]/2.0f;
 					break;
 				case _FONT_ALIGN_RIGHT:
-					posTrans[0]=x-linew[line];
+					posTrans[0]=(GLfloat)x-linew[line];
 					break;
 			}
 			posTrans[1]=(GLfloat)(y-size*scale+font->fonth*advscale+line*(font->lineh+lineSpacing)*advscale);
 			continue;
 		}
 		texData[0]=texData[4]=(GLfloat)((c%16)*0.0625);
-		texData[1]=texData[3]=(GLfloat)(floorf((c%_FONT_SET_CHARACTERS)/16)*0.0625);
+		texData[1]=texData[3]=(GLfloat)(floor((c%_FONT_SET_CHARACTERS)/16)*0.0625);
 		texData[2]=texData[6]=(GLfloat)((c%16+1)*0.0625);
-		texData[5]=texData[7]=(GLfloat)(floorf((c%_FONT_SET_CHARACTERS)/16+1)*0.0625);
+		texData[5]=texData[7]=(GLfloat)(floor((c%_FONT_SET_CHARACTERS)/16+1)*0.0625);
 		glActiveTexture(GL_TEXTURE0);
 		if (c%_FONT_SET_CHARACTERS)
 		font->bind1();
@@ -1035,7 +1040,7 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 		glUniform2fv(drawTrans,1,posTrans);
 		glUniform1i(drawTextured,textured);
 		glDrawArrays(GL_TRIANGLE_STRIP,0,4);
-		posTrans[0]+=font->charw[c]*advscale;
+		posTrans[0]+=(GLfloat)(font->charw[c]*advscale);
 	}
 	
 	restoreColor();
@@ -1199,6 +1204,7 @@ void EngineLayer::parseTouchables()
 	
 	for(std::vector<Touchable*>::iterator it=touchables.begin();it!=touchables.end();++it)
 	{
+		if ((*it)->pointer==NULL||(*it)->pointer->isRunEnabled())
 		if ((*it)->mouse!=-1)
 		{
 			if (getMouseIdle((*it)->mouse))
@@ -1219,7 +1225,7 @@ void EngineLayer::parseTouchables()
 		
 		for(std::vector<Touchable*>::iterator it=touchables.begin();it!=touchables.end();++it)
 		if ((*it)->enabled)
-		if (((*it)->mouse==-1)&&(touch==NULL||touch->getDepth()>(*it)->getDepth()))
+		if (((*it)->mouse==-1)&&(touch==NULL||touch->getDepth()<(*it)->getDepth()))
 		if (getMouseTranslatedX(t)>=(*it)->x&&getMouseTranslatedX(t)<(*it)->x+(*it)->w&&getMouseTranslatedY(t)>=(*it)->y&&getMouseTranslatedY(t)<(*it)->y+(*it)->h)
 		touch=(*it);
 		

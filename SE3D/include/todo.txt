@@ -18,17 +18,7 @@ separate font shader?
 function to escape default draw stuff and use custom gl instead
  a funciton to return to default draw stuff
 
-make void game() work with extern, somehow..
- make sikal into a single library (not like i need one but it should be possible because of the extern)
- do it:
-  void game();
-  #include "sikal.h" //will set run pointer to game (or main, from which you could call se3d::run... sounds delicious)
-  void game(){}
-   OH how about:
-    #ifdef ANDROID
-     int main();
-     
-    #endif
+remove using namespaces from .h namespaces
 
 sensors
  accelerometer
@@ -67,6 +57,13 @@ default texture
 
 const &everything
 
-dlog about unloaded resources
+multishader support
+ with defines / includes / files
+ var part
+ color application part
+ etc
+ and compose all
 
-font realignment required!
+hidden assets
+
+same way android does main, do listing of objects and scenes

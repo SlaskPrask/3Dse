@@ -19,6 +19,10 @@ namespace _engineprivate
 	void EngineLayerSetupJNI(JNIEnv* env, jobject obj);
 	#endif
 
+	bool CallbackDeleteFile(const std::string &f);
+	bool CallbackExistsFile(const std::string &f);
+	bool CallbackWriteFile(const std::string &f,const std::string &s);
+	bool CallbackReadFile(const std::string &f,std::string *s);
 	void CallbackPrintLog(const std::string &s);
 	void CallbackSetTitle(const std::string &s);
 	void CallbackSetOrientation(int orientation);

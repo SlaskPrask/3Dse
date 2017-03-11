@@ -69,5 +69,9 @@ namespace _ENGINESPACE
 		{
 			return sprites.size()+sounds.size()+fonts.size();
 		}
+		inline bool isLoaded()
+		{
+			return loads>=1;
+		}
 	};
 }

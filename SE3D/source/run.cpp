@@ -9,7 +9,11 @@ void EngineLayer::run(double delta)
 	static bool init=1;
 	if (init)
 	{
-		main(0,NULL);
+		if (_engine::MainFunction::mainFunction())
+		{
+			int (*mainf)(int,char**)=_engine::MainFunction::mainFunction();
+			mainf(0,NULL);
+		}
 		init=0;
 		return;
 	}
@@ -92,14 +96,14 @@ void EngineLayer::coreRun(double delta)
 	{
 		_engine::generateTexture((*loaderdata.begin()).destination,(*loaderdata.begin()).texwidth,(*loaderdata.begin()).texheight,(*loaderdata.begin()).data,(*loaderdata.begin()).type);
 		delete[] ((*loaderdata.begin()).data);
-		loaderdata.pop_front();
+		loaderdata.erase(loaderdata.begin());
 	}
 	pullResources=0;
 	loadlock.unlock();
 
 	//events
 	eventParser();
-	
+
 	//touchables
 	parseTouchables();
 
@@ -197,7 +201,7 @@ void EngineLayer::coreEnd()
 	while(!loaderdata.empty())
 	{
 		delete[] (*loaderdata.begin()).data;
-		loaderdata.pop_front();
+		loaderdata.erase(loaderdata.begin());
 	}
 
 	//empty game end unloads to figure out which were left over

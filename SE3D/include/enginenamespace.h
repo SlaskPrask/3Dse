@@ -22,6 +22,22 @@ namespace _ENGINESPACE
 	{
 		return run(0,NULL,func);
 	}
+	inline bool fileExists(const std::string &file)
+	{
+		return EngineLayer::instance()->fileExists(file);
+	}
+	inline bool fileDelete(const std::string &file)
+	{
+		return EngineLayer::instance()->fileDelete(file);
+	}
+	inline bool fileWrite(const std::string &file,const std::string &text)
+	{
+		return EngineLayer::instance()->fileWrite(file,text);
+	}
+	inline bool fileRead(const std::string &file,std::string *text)
+	{
+		return EngineLayer::instance()->fileRead(file,text);
+	}
 	inline bool isFocusGained()
 	{
 		return EngineLayer::instance()->getFocusEvent();

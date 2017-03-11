@@ -50,10 +50,6 @@
 #endif
 #define _DEFAULT_TITLE "Game"
 
-#ifdef ANDROID
-int main(int argc,char *argv[]);
-#endif
-
 //release num,dev stage,patch,[0=alpha 1=beta 2=candidate 3=release]
 #define ENGINEVERSION "1.1.0.0"
 
@@ -84,7 +80,7 @@ namespace _engineprivate
 		bool focusGained;
 		bool focusLost;
 		std::string keyboardinput;
-		std::list<MouseEvent> mouseEvents;
+		std::vector<MouseEvent> mouseEvents;
 		LayerState()
 		{
 			backButton=windowResized=closed=paused=resumed=focusGained=focusLost=0;
@@ -131,7 +127,7 @@ namespace _engineprivate
 		volatile bool pullResources;
 		Loader loader;
 		std::mutex loadlock;
-		std::list<LoaderData> loaderdata;
+		std::vector<LoaderData> loaderdata;
 		ListHandle<Object> objects;
 		std::vector<Object*> depthQueue;
 		std::vector<Object*> depthChangeQueue;
@@ -147,7 +143,7 @@ namespace _engineprivate
 		#endif
 		Object *handleObj;
 		bool handleObjDeleted;
-		std::string resDirectory,workingDirectory;
+		std::string resDirectory,workDirectory;
 		static void(*gameStartFunc)();
 		static void(*gameEndFunc)();
 		static void(*gameWindowResizeFunc)();
@@ -384,6 +380,7 @@ namespace _engineprivate
 			return resDirectory;
 		}
 		std::string resourceDirectory(const std::string &file);
+		std::string workingDirectory(const std::string &file);
 		inline void sendMessage(const std::string &str)
 		{
 			message(str);
@@ -489,7 +486,7 @@ namespace _engineprivate
 			#ifdef ANDROID
 			return backButton;
 			#else
-			return getKeyHeld(sf::Keyboard::Escape);
+			return getKeyPress(sf::Keyboard::Escape);
 			#endif
 		}
 		
@@ -803,6 +800,22 @@ namespace _engineprivate
 			loadlock.lock();
 			pullResources=1;
 			loadlock.unlock();
+		}
+		inline bool fileExists(const std::string &file)
+		{
+			return CallbackExistsFile(workingDirectory(file));
+		}
+		inline bool fileDelete(const std::string &file)
+		{
+			return CallbackDeleteFile(workingDirectory(file));
+		}
+		inline bool fileWrite(const std::string &file,const std::string &text)
+		{
+			return CallbackWriteFile(workingDirectory(file),text);
+		}
+		inline bool fileRead(const std::string &file,std::string *text)
+		{
+			return CallbackReadFile(workingDirectory(file),text);
 		}
 		double getScreenRatio();
 		inline void addTouchable(Touchable *t)

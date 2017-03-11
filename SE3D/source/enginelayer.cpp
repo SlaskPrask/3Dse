@@ -33,14 +33,12 @@ int EngineLayer::event(int id, int size, int *value)
 			return 0;
 		case 4://mouse down(which,x,y)
 			instance()->state.mouseEvents.push_back(MouseEvent(value[0],MouseEvent::Press,value[1],value[2]));
-			Log::log("FIND",std::string("Press event ")+to_string(value[0]));
 			return 0;
 		case 5://mouse move(which,x,y)
 			instance()->state.mouseEvents.push_back(MouseEvent(value[0],MouseEvent::Held,value[1],value[2]));
 			return 0;
 		case 6://mouse up(which,x,y)
 			instance()->state.mouseEvents.push_back(MouseEvent(value[0],MouseEvent::Release,value[1],value[2]));
-			Log::log("FIND",std::string("Release event ")+to_string(value[0]));
 			return 0;
 		case 7://focus lost
 			instance()->state.focusLost=1;
@@ -92,7 +90,6 @@ void EngineLayer::eventParser()
 	{
 		if (width!=reqWidth||height!=reqHeight)
 		{
-			Log::log("Engine","Window resized to "+to_string(getWidth())+","+to_string(getHeight()));
 			reqWidth=width;
 			reqHeight=height;
 		}
@@ -245,16 +242,10 @@ void EngineLayer::eventParser()
 
 	int newPresses=0;
 	MouseEvent me;
-	if (backButton)
-	Log::log("FIND",std::string("mouse events:") + to_string(state.mouseEvents.size()));
 
 	while (!(state.mouseEvents.empty()))
 	{
 		me=*(state.mouseEvents.begin());
-		if (backButton)
-			Log::log("FIND",std::string("mouse number ") + to_string(me.which));
-		if (backButton)
-			Log::log("FIND",std::string("mouse type ") + to_string(me.type));
 		if (me.which<_MAX_MOUSES)
 		{
 			//could ignore this if the "if"'s in cases fail
@@ -300,12 +291,7 @@ void EngineLayer::eventParser()
 					break;
 			}
 		}
-		state.mouseEvents.pop_front();
-	}
-
-	if (backButton)
-	{
-		Log::log("FIND",std::string("mouse 0,0:") + to_string(mouseState[0][0]));
+		state.mouseEvents.erase(state.mouseEvents.begin());
 	}
 }
 
