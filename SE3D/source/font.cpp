@@ -13,7 +13,10 @@ Font::Font()
 void Font::init()
 {
 	w=h=0;
-	texture1=texture2=0;
+	texture=NULL;
+	charw=NULL;
+	textures=0;
+	characters=0;
 	resource="";
 	size=4;
 	lineh=0;
@@ -22,37 +25,50 @@ void Font::init()
 	xoff=yoff=0;
 }
 
-Font::Font(const std::string &file,int s,volatile bool threaded)
+Font::Font(const std::string &file,int s,unsigned int numchars,volatile bool threaded)
 {
 	init();
-	load(file,s,threaded);
+	load(file,s,numchars,threaded);
 }
 
-void Font::setData(int startc,int camount,float *meas,float *charwidth,int texsize,int xoff,int yoff)
+void Font::setData(int startc,int camount,float meas[3],float *charwidth,int texsizew,int texsizeh,int xoff,int yoff)
 {
 	for(int i=0;i<camount;i++)
 	charw[i+startc]=charwidth[i+startc];
 	descent=meas[0];
 	lineh=fonth=meas[1];
 	ascent=meas[2];
-	w=h=texsize;
+	w=texsizew;
+	h=texsizeh;
 	ratio=(double)w/16.0f/(double)size;
-	yratio=(double)h/16.0f/(double)fonth;
+	yratio=(double)h/(double)w;
 	this->xoff=-xoff;
 	this->yoff=yoff;//(double)texsize/16.0f/3.0f; //-charsize/3.0f
 }
 
-void Font::load(const std::string &file,int s,volatile bool threaded)
+void Font::load(const std::string &file,int s,unsigned int numchars,volatile bool threaded)
 {
 	unload();
 	
 	size=s;
 	if (size<4)
 	size=4;
-	texture1=CallbackLoadFont(file,size,this,0,_FONT_SET_CHARACTERS,threaded,&texture1);
-	texture2=CallbackLoadFont(file,size,this,_FONT_SET_CHARACTERS,_FONT_SET_CHARACTERS,threaded,&texture2);
+
+	bool valid=1;
+
+	textures=(unsigned int)ceil((double)numchars/(double)_FONT_SET_CHARACTERS);
+	characters=numchars;
+	charw=new double[textures*_FONT_SET_CHARACTERS];
+	texture=new GLuint[textures];
+
+	for(unsigned int i=0;i<textures;i++)
+	{
+		texture[i]=CallbackLoadFont(file,size,this,i*_FONT_SET_CHARACTERS,(i+1)*_FONT_SET_CHARACTERS,characters,threaded,&(texture[i]));
+		if (texture[i]==0)
+		valid=0;
+	}
 	
-	if (texture1==0||texture2==0)
+	if (!valid)
 	unload();
 	else
 	{
@@ -63,25 +79,42 @@ void Font::load(const std::string &file,int s,volatile bool threaded)
 
 void Font::reload()
 {
-	texture1=CallbackLoadFont(resource,size,this,0,_FONT_SET_CHARACTERS,0,&texture1);
-	texture2=CallbackLoadFont(resource,size,this,_FONT_SET_CHARACTERS,_FONT_SET_CHARACTERS,0,&texture1);
-	
-	if (texture1==0||texture2==0)
+	bool valid=1;
+	for (unsigned int i=0;i<textures;i++)
+	{
+		texture[i]=CallbackLoadFont(resource,size,this,i*_FONT_SET_CHARACTERS,(i+1)*_FONT_SET_CHARACTERS,characters,0,&(texture[i]));
+		if (texture[i]==0)
+			valid=0;
+	}
+
+	if (!valid)
 	unload();
 }
 
 void Font::unload()
 {
-	if (texture1!=0||texture2!=0)
-	EngineLayer::instance()->unlistLoadedFont(this);
-	if (texture1!=0)
-	glDeleteTextures(1,&texture1);
-	if (texture2!=0)
-	glDeleteTextures(1,&texture2);
+	if (texture!=NULL)
+	{
+		EngineLayer::instance()->unlistLoadedFont(this);
+
+		for(unsigned int i=0;i<textures;i++)
+		if (texture[i]!=0)
+		glDeleteTextures(1,&(texture[i]));
+
+		delete[] texture;
+		texture=NULL;
+	}
+	if (charw!=NULL)
+	{
+		delete[] charw;
+		charw=NULL;
+	}
+	textures=0;
+	characters=0;
+
 	resource="";
 	w=h=0;
 	size=4;
-	texture1=texture2=0;
 }
 
 Font::~Font()

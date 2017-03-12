@@ -110,7 +110,11 @@ EngineLayer::EngineLayer()
 	widthRatio=heightRatio=1;
 	dominantRatio=0;
 	resDirectory="";
+	#ifndef ANDROID
 	workDirectory="./";
+	#else
+	workDirectory="";
+	#endif
 	
 	GLfloat vnear=1.0f,vfar=-1.0f,vtop=0.0f,vleft=0.0f,vright=(GLfloat)width,vbottom=(GLfloat)height;
 	ortho[0]=2.0f/(vright-vleft);
@@ -298,12 +302,15 @@ void EngineLayer::setResourceDirectory(const std::string &str)
 	#endif
 }
 
-void EngineLayer::addKeyboardChar(std::string *s,bool newlines)
+void EngineLayer::addKeyboardChar(std::string *s,bool newlines,unsigned int valuelimit)
 {
 	for (unsigned int i=0;i<keyboardstr.size();i++)
 	{
-		if (keyboardstr[i]<32)
-			switch (keyboardstr[i])
+		unsigned int value=keyboardstr[i]<0?256-keyboardstr[i]:keyboardstr[i];
+		if (value<valuelimit)
+		{
+			if (value<32)//special characters
+			switch (value)
 			{
 				default:
 					break;
@@ -317,15 +324,16 @@ void EngineLayer::addKeyboardChar(std::string *s,bool newlines)
 					*s=s->substr(0,s->size() - 1);
 					break;
 			}
-		else
-			switch (keyboardstr[i])
+			else
+			switch (value)
 			{
 				case 127://delete
 					break;
 				default:
-					*s+=keyboardstr[i];
+					*s+=value;
 					break;
 			}
+		}
 	}
 }
 
@@ -954,13 +962,14 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 	
 	GLfloat lineHeight=(GLfloat)font->lineh;
 	GLfloat scale=(GLfloat)font->ratio;
+	GLfloat heightmultiplier=(GLfloat)font->yratio;
 	GLfloat advscale=(GLfloat)(size/(double)font->size);
 	GLfloat xoff=(GLfloat)font->xoff;
 	GLfloat yoff=(GLfloat)font->yoff;
 	
 	textured=1;
 	squareData[0]=squareData[4]=xoff*(GLfloat)advscale;
-	squareData[1]=squareData[3]=yoff*(GLfloat)advscale;
+	squareData[1]=squareData[3]=yoff*(GLfloat)advscale-(GLfloat)(size*scale)*(heightmultiplier-1);
 	squareData[2]=squareData[6]=xoff*(GLfloat)advscale+(GLfloat)(size*scale);
 	squareData[5]=squareData[7]=yoff*(GLfloat)advscale+(GLfloat)(size*scale);
 	
@@ -974,7 +983,10 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 		for (unsigned int i=0;i<ln.size();i++)
 		{
 			c=ln.at(i);
-			if (c<0||c>=_FONT_CHARACTERS)
+			if (c<0)
+			c=256-c;
+
+			if (c<0||c>=font->characters)
 			continue;
 			
 			offset+=(GLfloat)font->charw[c];
@@ -1004,8 +1016,10 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 	for(unsigned int i=0;i<str.length();i++)
 	{
 		c=str.at(i);
+		if (c<0)
+		c=256-c;
 		
-		if (c<0||c>=_FONT_CHARACTERS)
+		if (c<0||c>=font->characters)
 		continue;
 		
 		if (c=='\n')
@@ -1032,10 +1046,9 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 		texData[2]=texData[6]=(GLfloat)((c%16+1)*0.0625);
 		texData[5]=texData[7]=(GLfloat)(floor((c%_FONT_SET_CHARACTERS)/16+1)*0.0625);
 		glActiveTexture(GL_TEXTURE0);
-		if (c%_FONT_SET_CHARACTERS)
-		font->bind1();
-		else
-		font->bind2();
+		
+		font->bind((unsigned int)floor((double)c/(double)_FONT_SET_CHARACTERS));
+
 		glUniform1i(drawTex,0);
 		glUniform2fv(drawTrans,1,posTrans);
 		glUniform1i(drawTextured,textured);
@@ -1225,7 +1238,7 @@ void EngineLayer::parseTouchables()
 		
 		for(std::vector<Touchable*>::iterator it=touchables.begin();it!=touchables.end();++it)
 		if ((*it)->enabled)
-		if (((*it)->mouse==-1)&&(touch==NULL||touch->getDepth()<(*it)->getDepth()))
+		if (((*it)->mouse==-1)&&(touch==NULL||touch->getDepth()>(*it)->getDepth()))
 		if (getMouseTranslatedX(t)>=(*it)->x&&getMouseTranslatedX(t)<(*it)->x+(*it)->w&&getMouseTranslatedY(t)>=(*it)->y&&getMouseTranslatedY(t)<(*it)->y+(*it)->h)
 		touch=(*it);
 		
@@ -1439,32 +1452,54 @@ void EngineLayer::dumpDepths()
 	DepthItem *di,*diNext;
 	int i=0;
 	if (di=firstDepth)
-	while (di)
+		while (di)
+		{
+			diNext=di->getNext();
+			std::ostringstream s;
+			//i
+			s << to_string(i) << ": ";
+
+			//prev
+			if (di->getPrevious())
+				s << di->getPrevious() << "(" << di->getPrevious()->get() << ":" << di->getPrevious()->getDepth() << ") -> ";
+			else
+				s << ((Object*)NULL) << "(" << ((Object*)NULL) << ":-) -> ";
+
+			//this
+			s << di << "(" << di->get() << ":" << di->getDepth() << ")";
+
+			//next
+			if (di->getNext())
+				s << " -> " << di->getNext() << "(" << di->getNext()->get() << ":" << di->getNext()->getDepth() << ")";
+			else
+				s << " -> " << ((Object*)NULL) << "(" << ((Object*)NULL) << ":-)";
+
+			Log::log("Debug",s.str().c_str());
+			i++;
+
+			di=diNext;
+		}
+
+	Log::log("Debug","");
+}
+void EngineLayer::dumpTouchables()
+{
+	Log::log("Debug","TOUCHABLES:");
+
+	int i=0;
+	for (std::vector<Touchable*>::iterator it=touchables.begin();it!=touchables.end();++it)
 	{
-		diNext=di->getNext();
 		std::ostringstream s;
-		//i
-		s << to_string(i) << ": ";
-
-		//prev
-		if (di->getPrevious())
-		s << di->getPrevious() << "(" << di->getPrevious()->get() << ":" << di->getPrevious()->getDepth() << ") -> ";
-		else
-		s << ((Object*)NULL) << "(" << ((Object*)NULL) << ":-) -> ";
-
-		//this
-		s << di << "(" << di->get() << ":" << di->getDepth() << ")";
-
-		//next
-		if (di->getNext())
-		s << " -> " << di->getNext() << "(" << di->getNext()->get() << ":" << di->getNext()->getDepth() << ")";
-		else
-		s << " -> " << ((Object*)NULL) << "(" << ((Object*)NULL) << ":-)";
-
+		s << to_string(i) << ": " << &(*it) << " (" << (*it)->getDepth() << ")" << " (" << (*it)->getX() << "," << (*it)->getY() << ")[" << (*it)->getWidth() << "," << (*it)->getHeight() << "]";
+		if ((*it)->pointer)
+		{
+			s << " " << ((*it)->pointer) << " " << ((*it)->pointer)->objectName();
+			s << " (" << ((*it)->pointer->_depthItem) << ":" << ((*it)->pointer->_depth) << ")";
+		}
+		if (!(*it)->isEnabled())
+		s << " Disabled";
 		Log::log("Debug",s.str().c_str());
 		i++;
-
-		di=diNext;
 	}
 
 	Log::log("Debug","");
@@ -1534,6 +1569,8 @@ void EngineLayer::debugHandler()
 		dumpObjectDepths();
 		if (getKeyPress(sf::Keyboard::Key::F10))
 		dumpDepths();
+		if (getKeyPress(sf::Keyboard::Key::F9))
+		dumpTouchables();
 
 		if (getKeyPress(sf::Keyboard::Key::F8))
 		debugToggleCollision();

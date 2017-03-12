@@ -32,7 +32,7 @@ namespace _engineprivate
 	void CallbackRequestInput(int type);
 	void CallbackSetFPS(int fps);
 	GLuint CallbackLoadPNG(const std::string &s,int *width,int *height,bool threaded=0,GLuint *destination=0);
-	GLuint CallbackLoadFont(const std::string &s,int size,Font *fnt,int startc,int camount,bool threaded=0,GLuint *destination=0);
+	GLuint CallbackLoadFont(const std::string &s,int size,Font *fnt,int startc,int camount,int totalchars=_FONT_SET_CHARACTERS,bool threaded=0,GLuint *destination=0);
 	int CallbackLoadSound(const std::string &s);
 	void CallbackUnloadSound(int i);
 	int CallbackPlaySound(int i,float l,float r,int prio,int loops,float speed);

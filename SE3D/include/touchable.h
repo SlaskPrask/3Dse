@@ -93,6 +93,10 @@ namespace _ENGINESPACE
 		{
 			return h;
 		}
+		inline bool getClick()
+		{
+			return getRelease()&&isInside();
+		}
 		~Touchable();
 
 		#ifdef DEBUG

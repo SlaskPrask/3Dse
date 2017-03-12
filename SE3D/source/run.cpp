@@ -122,10 +122,12 @@ void EngineLayer::coreRun(double delta)
 	}
 
 	//focus
+	#ifndef ANDROID //android directly handles these in event
 	if (focusLost&&gameFocusLossFunc)
 	gameFocusLossFunc();
 	if (focusGained&&gameFocusGainFunc)
 	gameFocusGainFunc();
+	#endif
 
 	switchingScenes=0;
 	if (scene)

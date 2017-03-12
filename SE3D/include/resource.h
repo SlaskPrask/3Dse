@@ -24,6 +24,7 @@ namespace _engineprivate
 		std::string file;
 		void *data;
 		int type;
+		unsigned int fontchars;
 		void load(volatile bool threaded=0);
 		void unload();
 		enum Types{TypeEmpty,TypeSprite,TypeSound,TypeFont};
@@ -35,7 +36,7 @@ namespace _engineprivate
 		~Resource();
 		void setSprite(const std::string &s);
 		void setSound(const std::string &s);
-		void setFont(const std::string &s,int sz=_FONT_DEFAULT_SIZE);
+		void setFont(const std::string &s,int sz=_FONT_DEFAULT_SIZE,unsigned int chars=_FONT_SET_CHARACTERS);
 		void setEmpty();
 		inline Sprite* getSprite()
 		{

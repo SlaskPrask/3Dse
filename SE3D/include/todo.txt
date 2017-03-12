@@ -64,6 +64,12 @@ multishader support
  etc
  and compose all
 
+pc works with std::string values -128 to 127
+ android works with values 0 to 256
+
+inspect font textures
+ remove second font texture as strings only go to 256
+
 hidden assets
 
 same way android does main, do listing of objects and scenes

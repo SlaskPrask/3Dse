@@ -75,7 +75,7 @@ namespace _ENGINESPACE
 		return v|((i)&mask);
 	}
 	template<class T>
-	bool _ENGINESPACE::writeBytes(std::string *str,T value,unsigned int bytes=0)
+	bool writeBytes(std::string *str,T value,unsigned int bytes=0)
 	{
 		if (bytes==0)
 		bytes=sizeof(T);
@@ -86,7 +86,7 @@ namespace _ENGINESPACE
 		return 1;
 	}
 	template<class T>
-	bool _ENGINESPACE::readBytes(std::string *str,T *value,unsigned int bytes=0)
+	bool readBytes(std::string *str,T *value,unsigned int bytes=0)
 	{
 		if (bytes==0)
 		bytes=sizeof(T);

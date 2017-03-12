@@ -130,7 +130,7 @@ GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *heig
 	return 0;
 }
 
-GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,int startc,int camount,bool threaded,GLuint *destination)
+GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,int startc,int camount,int totalchars,bool threaded,GLuint *destination)
 {
 	FT_Library *lib=EngineLayer::instance()->getFontLib();
 	if (!lib)
@@ -148,7 +148,7 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 
 	FT_Set_Char_Size(face,size<<6,size<<6,72,72);//73.5,73.5
 	float meas[3];//descent,lineh,ascent
-	float charwidth[_FONT_CHARACTERS];
+	float *charwidth=new float[totalchars];
 
 	meas[0]=-(float)(face->size->metrics.descender>>6);
 	//meas[1]=(float)(face->size->metrics.height>>6);//bottom+top
@@ -162,7 +162,7 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	FT_Glyph glyph;
 	FT_BitmapGlyph bmpg;
 	FT_Bitmap *bmp;
-	for (int c=0;c<_FONT_CHARACTERS;c++)
+	for (int c=0;c<totalchars;c++)
 	{
 		if (FT_Load_Glyph(face,FT_Get_Char_Index(face,c),FT_LOAD_DEFAULT))
 		{
@@ -195,17 +195,19 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	int cellw=(int)cwidth+2;
 	int cellh=(int)cheight+2;
 
-	int cellsize=(cellw>cellh?cellw:cellh);
+	int texsizew=cwidth*16;
+	int texsizeh=cheight*16;
+	Log::log(to_string(texsizew));
+	Log::log(to_string(texsizeh));
+	
+	/* //RESULTS IN 1
+	int xoff=(int)((texsizew/16-cwidth)/2);
+	int yoff=(int)((texsizew/16-cheight)/2);
+	*/ //SO
+	int xoff=1;
+	int yoff=1;
 
-	int charsize=1;
-	while (charsize<cellsize)
-		charsize*=2;
-	int texsize=charsize*16;
-
-	int xoff=(int)((charsize-cwidth)/2);
-	int yoff=(int)((charsize-cheight)/2);
-
-	GLubyte *data=new GLubyte[texsize*texsize*2];//double bytes because contains color byte and alpha byte (c,a)GL_LUMINANCE_ALPHA not like 4x (r,g,b,a)GL_RGBA
+	GLubyte *data=new GLubyte[texsizew*texsizeh*2];//double bytes because contains color byte and alpha byte (c,a)GL_LUMINANCE_ALPHA not like 4x (r,g,b,a)GL_RGBA
 
 	for (int c=0;c<camount;c++)
 	{
@@ -225,26 +227,26 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 		bmp=&bmpg->bitmap;
 
 		int offx=(int)((face->glyph->metrics.horiBearingX>>6)+xoff);
-		int offy=(int)(charsize-1-meas[0]-1-(face->glyph->metrics.horiBearingY>>6)-yoff);
+		int offy=(int)(cheight-1-meas[0]-1-(face->glyph->metrics.horiBearingY>>6)-yoff);
 
 		int ox=1+offx+face->glyph->bitmap_left;
 		int oy=1+offy+face->glyph->bitmap_top;
-		int px=(c%16)*charsize;
-		int py=(int)(c/16)*texsize*charsize;
-		for (int j=0;j<charsize;j++)
-		for (int i=0;i<charsize;i++)
+		int px=(c%16)*cwidth;
+		int py=(int)(c/16)*texsizew*cheight;
+		for (int j=0;j<cheight;j++)
+		for (int i=0;i<cwidth;i++)
 		{
 			//set two neighboring containers the same (c,a)
 			if (i<ox||i>=ox+(int)bmp->width
 				||  j<oy||j>=oy+(int)bmp->rows)
 			{
-				data[(py+px+i+j*(texsize))*2]=0xFF;
-				data[(py+px+i+j*(texsize))*2+1]=0;
+				data[(py+px+i+j*(texsizew))*2]=0xFF;
+				data[(py+px+i+j*(texsizew))*2+1]=0;
 			}
 			else
 			{
-				data[(py+px+i+j*(texsize))*2]=0xFF;
-				data[(py+px+i+j*(texsize))*2+1]=bmp->buffer[i-ox+bmp->width*(j-oy)];
+				data[(py+px+i+j*(texsizew))*2]=0xFF;
+				data[(py+px+i+j*(texsizew))*2+1]=bmp->buffer[i-ox+bmp->width*(j-oy)];
 			}
 		}
 
@@ -262,21 +264,23 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	data[i*2+1]=0x88;
 	//*/
 
-	EngineLayer::instance()->setFontData(fnt,startc,camount,meas,charwidth,texsize,xoff,yoff);
+	EngineLayer::instance()->setFontData(fnt,startc,camount,meas,charwidth,texsizew,texsizeh,xoff,yoff);
 	FT_Done_Face(face);
+
+	delete[] charwidth;
 
 	if (!threaded)
 	{
 		GLuint tex=0;
 
-		_engine::generateTexture(&tex,texsize,texsize,data,GL_LUMINANCE_ALPHA);
+		_engine::generateTexture(&tex,texsizew,texsizeh,data,GL_LUMINANCE_ALPHA);
 
 		delete[] data;
 		return tex;
 	}
 	else
 	{
-		EngineLayer::pushLoaderData(destination,texsize,texsize,data,GL_LUMINANCE_ALPHA);
+		EngineLayer::pushLoaderData(destination,texsizew,texsizeh,data,GL_LUMINANCE_ALPHA);
 		return 1;//temp value
 	}
 	return 0;

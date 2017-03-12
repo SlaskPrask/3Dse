@@ -472,7 +472,7 @@ namespace _engineprivate
 		{
 			return anykeyreleased;
 		}
-		void addKeyboardChar(std::string *s,bool newlines=1);
+		void addKeyboardChar(std::string *s,bool newlines=1,unsigned int valuelimit=256);
 		inline int getMouseWheelUp(int i)
 		{
 			return mouseWheelUp[i];
@@ -529,9 +529,9 @@ namespace _engineprivate
 		}
 		
 		//graphics
-		void setFontData(Font *font,int startc,int camount,float *meas,float *charwidth,int texsize,int xoff,int yoff)
+		void setFontData(Font *font,int startc,int camount,float *meas,float *charwidth,int texsizew,int texsizeh,int xoff,int yoff)
 		{
-			font->setData(startc,camount,meas,charwidth,texsize,xoff,yoff);
+			font->setData(startc,camount,meas,charwidth,texsizew,texsizeh,xoff,yoff);
 		}
 		void reloadSprites();
 		void reloadFonts();
@@ -841,6 +841,7 @@ namespace _engineprivate
 		void dumpObjects();
 		void dumpObjectDepths();
 		void dumpObjects(unsigned int id);
+		void dumpTouchables();
 		void dumpDepths();
 		void dumpDepthQueue();
 		void dumpDepthChangeQueue();

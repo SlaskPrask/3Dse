@@ -46,10 +46,10 @@ Resource* ResourceSet::addSound(const std::string &s)
 	return r;
 }
 
-Resource* ResourceSet::addFont(const std::string &s,int sz)
+Resource* ResourceSet::addFont(const std::string &s,int sz,unsigned int characters)
 {
 	Resource *r=new Resource();
-	r->setFont(s,sz);
+	r->setFont(s,sz,characters);
 	fonts.push_back(r);
 	return r;
 }

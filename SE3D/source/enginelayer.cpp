@@ -42,6 +42,8 @@ int EngineLayer::event(int id, int size, int *value)
 			return 0;
 		case 7://focus lost
 			instance()->state.focusLost=1;
+			if (instance()->gameFocusLossFunc)
+			instance()->gameFocusLossFunc();
 			return 0;
 		case 8://run
 			instance()->run(value[0]<=0?0.001:(double)value[0]/1000.0f);
@@ -54,6 +56,8 @@ int EngineLayer::event(int id, int size, int *value)
 			return 0;
 		case 11://focus gain
 			instance()->state.focusGained=1;
+			if (instance()->gameFocusGainFunc)
+			instance()->gameFocusGainFunc();
 			return 0;
 	}
 	return 0;
@@ -67,7 +71,12 @@ std::string EngineLayer::stringEvent(int id, int size, std::string *value)
 		default:
 			break;
 		case 0://text keyboard input
-			instance()->state.keyboardinput=value[0];
+			{
+				instance()->state.keyboardinput="";
+				for(unsigned int i=0;i<value[0].length();i++)
+				if (value[0][i]<256)
+				instance()->state.keyboardinput+=value[0][i];
+			}
 			break;
 	}
 	return ret;
@@ -180,8 +189,8 @@ void EngineLayer::eventParser()
 				instance()->state.focusGained=1;
 				break;
 			case sf::Event::TextEntered:
-				if (event.text.unicode<128)
-				keyboardstr+=(char)event.text.unicode;
+				if (event.text.unicode<256)
+				keyboardstr+=event.text.unicode;
 				break;
 			case sf::Event::KeyPressed:
 				if (event.key.code>=0&&event.key.code<MAX_KEYBOARD_KEYS)

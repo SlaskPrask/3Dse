@@ -11,6 +11,7 @@ Resource::Resource()
 	file="";
 	type=TypeEmpty;
 	size=_FONT_DEFAULT_SIZE;
+	fontchars=_FONT_SET_CHARACTERS;
 }
 
 Resource::~Resource()
@@ -33,7 +34,7 @@ void Resource::load(volatile bool threaded)
 			data=new Sound(EngineLayer::instance()->resourceDirectory(file),threaded);
 			break;
 		case TypeFont:
-			data=new Font(EngineLayer::instance()->resourceDirectory(file),size,threaded);
+			data=new Font(EngineLayer::instance()->resourceDirectory(file),size,fontchars,threaded);
 			break;
 	}
 }
@@ -74,11 +75,12 @@ void Resource::setSound(const std::string &s)
 	file=s;
 }
 
-void Resource::setFont(const std::string &s,int sz)
+void Resource::setFont(const std::string &s,int sz,unsigned int chars)
 {
 	type=TypeFont;
 	size=sz;
 	file=s;
+	fontchars=chars;
 }
 
 void Resource::setEmpty()

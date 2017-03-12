@@ -502,9 +502,9 @@ namespace _ENGINESPACE
 	{
 		return EngineLayer::instance()->getMouseWheelDown(i);
 	}
-	inline void keyboardTextBuffer(std::string *str,bool newlines = 0)
+	inline void keyboardTextBuffer(std::string *str,bool newlines=0,unsigned int valuelimit=256)
 	{
-		EngineLayer::instance()->addKeyboardChar(str,newlines);
+		EngineLayer::instance()->addKeyboardChar(str,newlines,valuelimit);
 	}
 	inline bool getAnyKeyPress()
 	{

@@ -32,7 +32,7 @@ jstring _engineprivate::EngineLayerStringEvent(JNIEnv *env,jobject obj, jint id,
 	jsize size=env->GetArrayLength(arg);
 	std::string *value=new std::string[size];
 	for(int i=0;i<size;i++)
-	value[i]=(const char*)env->GetStringUTFChars((jstring)env->GetObjectArrayElement(arg,i),0);
+	value[i]=(const char*)env->GetStringChars((jstring)env->GetObjectArrayElement(arg,i),0);
 
 	result=env->NewStringUTF(_engineprivate::EngineLayer::stringEvent(id,size,value).c_str());
 
@@ -75,10 +75,12 @@ bool _engineprivate::CallbackWriteFile(const std::string &f,const std::string &s
 {
 	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
 	jstring str=e->NewStringUTF(f.c_str());
-	jstring text=e->NewStringUTF(s.c_str());
+	jbyteArray text=e->NewByteArray(s.length());
+	const char *cstr=s.c_str();
+	e->SetByteArrayRegion(text,0,s.length(),(const jbyte*)cstr);
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 
-	jmethodID m=e->GetStaticMethodID(c,"writeFile","(Ljava/lang/String;Ljava/lang/String;)I");
+	jmethodID m=e->GetStaticMethodID(c,"writeFile","(Ljava/lang/String;[B)I");
 	int res=e->CallStaticIntMethod(c,m,str,text);
 	e->DeleteLocalRef(str);
 	e->DeleteLocalRef(text);
@@ -92,17 +94,23 @@ bool _engineprivate::CallbackReadFile(const std::string &f,std::string *s)
 	jstring str=e->NewStringUTF(f.c_str());
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 
-	jintArray inputdata=e->NewIntArray(1);
-	jmethodID m=e->GetStaticMethodID(c,"readFile","(Ljava/lang/String;[I)Ljava/lang/String;");
-	jstring text=(jstring)e->CallStaticObjectMethod(c,m,str,inputdata);
+	jintArray inputdata=e->NewIntArray(2);
+	jmethodID m=e->GetStaticMethodID(c,"readFile","(Ljava/lang/String;[I)[B");
+	jbyteArray text=(jbyteArray)e->CallStaticObjectMethod(c,m,str,inputdata);
 
 	jint *result=e->GetIntArrayElements(inputdata,0);
 	int res=result[0];
+	int length=result[1];
 	e->ReleaseIntArrayElements(inputdata,result,0);
 
-	const char *chr=e->GetStringUTFChars(text,NULL);
-	*s=chr;
-	e->ReleaseStringUTFChars(text,chr);
+	*s="";
+	if (res)
+	{
+		jbyte *chr=e->GetByteArrayElements(text,NULL);
+		for(int i=0;i<result[1];i++)
+		*s+=(char)chr[i];
+		e->ReleaseByteArrayElements(text,chr,0);
+	}
 
 	e->DeleteLocalRef(inputdata);
 	e->DeleteLocalRef(text);
@@ -224,37 +232,45 @@ GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *heig
 	return 0;
 }
 
-GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,int startc,int camount,bool threaded,GLuint *destination)
+GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,int startc,int camount,int totalchars,bool threaded,GLuint *destination)
 {
 	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
 	jstring str=e->NewStringUTF(s.c_str());
 	jclass c=*_engineprivate::EngineLayer::instance()->getAssetManager();
 
 	jfloatArray measures=e->NewFloatArray(3);
+	jintArray charsizes=e->NewIntArray(2);
 	jintArray offs=e->NewIntArray(2);
-	jfloatArray widths=e->NewFloatArray(_FONT_CHARACTERS);
+	jfloatArray widths=e->NewFloatArray(totalchars);
 	
-	jmethodID m=e->GetStaticMethodID(c,"loadFontSetup","(Ljava/lang/String;I[F[F[I)I");
-	jint texsize=e->CallStaticIntMethod(c,m,str,size,measures,widths,offs);
-	if (texsize<=0)
+	jmethodID m=e->GetStaticMethodID(c,"loadFontSetup","(Ljava/lang/String;I[I[F[F[II)I");
+	e->CallStaticIntMethod(c,m,str,size,charsizes,measures,widths,offs,totalchars);
+
+	jint *charsize=e->GetIntArrayElements(charsizes,0);
+	Log::log(to_string(charsize[0]));
+	Log::log(to_string(charsize[1]));
+	if (charsize[0]<=0||charsize[1]<=0)
 	{
 		Log::error("Resources",std::string("Unable to load font file \"")+s+"\"");
 		return 0;
 	}
 
+	int texsizew=charsize[0]*16;
+	int texsizeh=charsize[1]*16;
+
 	jfloat *meas=e->GetFloatArrayElements(measures,0);
 	jfloat *charwidth=e->GetFloatArrayElements(widths,0);
 	jint *xyoff=e->GetIntArrayElements(offs,0);
-	jintArray pixdata=e->NewIntArray(texsize*texsize);
+	jintArray pixdata=e->NewIntArray(texsizew*texsizeh);
 
-	m=e->GetStaticMethodID(c,"loadFont","(Ljava/lang/String;IIIIFII[I)V");
-	e->CallStaticVoidMethod(c,m,str,size,texsize,startc,camount,meas[0],xyoff[0],xyoff[1],pixdata);
+	m=e->GetStaticMethodID(c,"loadFont","(Ljava/lang/String;IIIIIFII[I)V");
+	e->CallStaticVoidMethod(c,m,str,size,texsizew,texsizeh,startc,camount,meas[0],xyoff[0],xyoff[1],pixdata);
 
 	jint *pixels=e->GetIntArrayElements(pixdata,0);
-	GLubyte *data=new GLubyte[texsize*texsize*4];
+	GLubyte *data=new GLubyte[texsizew*texsizeh*4];
 	
 	//max white (skip ARGB->ABGR)
-	for(int i=0;i<texsize*texsize;i++)
+	for(int i=0;i<texsizew*texsizeh;i++)
 	{
 		data[i*4+0]=0xFF;
 		data[i*4+1]=0xFF;
@@ -268,15 +284,17 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 		data[i*4+3]=0xFF/3;//*/ //show background
 	}
 	
-	EngineLayer::instance()->setFontData(fnt,startc,camount,meas,charwidth,texsize,xyoff[0],xyoff[1]);
+	EngineLayer::instance()->setFontData(fnt,startc,camount,meas,charwidth,texsizew,texsizeh,xyoff[0],xyoff[1]);
 	e->ReleaseFloatArrayElements(widths,charwidth,0);
 	e->ReleaseIntArrayElements(pixdata,pixels,0);
 	e->ReleaseIntArrayElements(offs,xyoff,0);
 	e->ReleaseFloatArrayElements(measures,meas,0);
+	e->ReleaseIntArrayElements(charsizes,charsize,0);
 
 	e->DeleteLocalRef(str);
 	e->DeleteLocalRef(offs);
 	e->DeleteLocalRef(measures);
+	e->DeleteLocalRef(charsizes);
 	e->DeleteLocalRef(widths);
 	e->DeleteLocalRef(pixdata);
 
@@ -284,14 +302,14 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	{
 		GLuint tex=0;
 
-		_engine::generateTexture(&tex,texsize,texsize,data,GL_RGBA);
+		_engine::generateTexture(&tex,texsizew,texsizeh,data,GL_RGBA);
 
 		delete[] data;
 		return tex;
 	}
 	else
 	{
-		_engineprivate::EngineLayer::pushLoaderData(destination,texsize,texsize,data,GL_RGBA);
+		_engineprivate::EngineLayer::pushLoaderData(destination,texsizew,texsizeh,data,GL_RGBA);
 		return 1;//temp value
 	}
 	return 0;
