@@ -75,6 +75,12 @@
     <Linkage-freeglut>static</Linkage-freeglut>
     <OutDir>$(SolutionDir)\..\$(Configuration)\</OutDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Linkage-freetype>static</Linkage-freetype>
+    <Linkage-freeglut>
+    </Linkage-freeglut>
+    <Linkage-glew>static</Linkage-glew>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -93,6 +99,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -122,10 +129,13 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\Dependencies\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>..\Dependencies\lib\freeglut.lib;..\Dependencies\lib\glew32s.lib;..\Dependencies\lib\sml-graphics.lib;..\Dependencies\lib\sfml-main.lib;..\Dependencies\lib\sfml-system.lib;..\Dependencies\lib\sfml-window.lib;..\Dependencies\lib\freetype271.lib</AdditionalDependencies>
+      <ShowProgress>LinkVerbose</ShowProgress>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -142,37 +152,37 @@
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\piece.h" />
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\point.h" />
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\tutorial.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\androidnames.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\animation.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\animationdata.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\animationframe.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\camera.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\collision.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\collisionobject.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\depthitem.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\enginecallback.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\enginelayer.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\enginenamespace.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\enginenamespaceext.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\enginesettings.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\enginewrapper.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\font.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\hitbox.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\linkedlist.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\listhandle.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\loader.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\log.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\object.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\platformgraphics.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\resource.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\resourceset.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\scene.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\se3d.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\shader.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\sound.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\sprite.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\tag.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\include\touchable.h" />
+    <ClInclude Include="include\androidnames.h" />
+    <ClInclude Include="include\animation.h" />
+    <ClInclude Include="include\animationdata.h" />
+    <ClInclude Include="include\animationframe.h" />
+    <ClInclude Include="include\camera.h" />
+    <ClInclude Include="include\collision.h" />
+    <ClInclude Include="include\collisionobject.h" />
+    <ClInclude Include="include\depthitem.h" />
+    <ClInclude Include="include\enginecallback.h" />
+    <ClInclude Include="include\enginelayer.h" />
+    <ClInclude Include="include\enginenamespace.h" />
+    <ClInclude Include="include\enginenamespaceext.h" />
+    <ClInclude Include="include\enginesettings.h" />
+    <ClInclude Include="include\enginewrapper.h" />
+    <ClInclude Include="include\font.h" />
+    <ClInclude Include="include\hitbox.h" />
+    <ClInclude Include="include\linkedlist.h" />
+    <ClInclude Include="include\listhandle.h" />
+    <ClInclude Include="include\loader.h" />
+    <ClInclude Include="include\log.h" />
+    <ClInclude Include="include\object.h" />
+    <ClInclude Include="include\platformgraphics.h" />
+    <ClInclude Include="include\resource.h" />
+    <ClInclude Include="include\resourceset.h" />
+    <ClInclude Include="include\scene.h" />
+    <ClInclude Include="include\se3d.h" />
+    <ClInclude Include="include\shader.h" />
+    <ClInclude Include="include\sound.h" />
+    <ClInclude Include="include\sprite.h" />
+    <ClInclude Include="include\tag.h" />
+    <ClInclude Include="include\touchable.h" />
     <ClInclude Include="include\platform.h" />
   </ItemGroup>
   <ItemGroup>
@@ -189,39 +199,47 @@
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\menu.cpp" />
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\piece.cpp" />
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\point.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\tutorial.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\android\android.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\android\androidcallback.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\tutorial.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\animation.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\animationdata.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\camera.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\collision.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\collisionobject.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\depthitem.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\enginelayer.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\enginelayerimplementations.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\enginenamespace.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\enginenamespaceext.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\enginewrapper.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\font.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\hitbox.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\loader.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\log.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\object.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\resource.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\resourceset.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\run.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\scene.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\sound.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\sprite.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\tag.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\touchable.cpp" />
+    <ClCompile Include="source\android\android.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\android\androidcallback.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\animation.cpp" />
+    <ClCompile Include="source\animationdata.cpp" />
+    <ClCompile Include="source\camera.cpp" />
+    <ClCompile Include="source\collision.cpp" />
+    <ClCompile Include="source\collisionobject.cpp" />
+    <ClCompile Include="source\depthitem.cpp" />
+    <ClCompile Include="source\enginelayer.cpp" />
+    <ClCompile Include="source\enginelayerimplementations.cpp" />
+    <ClCompile Include="source\enginenamespace.cpp" />
+    <ClCompile Include="source\enginenamespaceext.cpp" />
+    <ClCompile Include="source\enginewrapper.cpp" />
+    <ClCompile Include="source\font.cpp" />
+    <ClCompile Include="source\hitbox.cpp" />
+    <ClCompile Include="source\loader.cpp" />
+    <ClCompile Include="source\log.cpp" />
+    <ClCompile Include="source\object.cpp" />
+    <ClCompile Include="source\resource.cpp" />
+    <ClCompile Include="source\resourceset.cpp" />
+    <ClCompile Include="source\run.cpp" />
+    <ClCompile Include="source\scene.cpp" />
+    <ClCompile Include="source\sound.cpp" />
+    <ClCompile Include="source\sprite.cpp" />
+    <ClCompile Include="source\tag.cpp" />
+    <ClCompile Include="source\touchable.cpp" />
     <ClCompile Include="source\standalone\callback.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -20,6 +20,7 @@ namespace _engineprivate
 		os<<value;
 		return os.str();
 	}
+	unsigned int hexStrToInt(const std::string &s);
 }
 
 

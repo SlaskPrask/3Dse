@@ -680,7 +680,7 @@ namespace _engineprivate
 			#ifdef ANDROID
 			return 1;
 			#else
-			return resolutions.size();
+			return (unsigned int)resolutions.size();
 			#endif
 		}
 		inline int getResolutionWidth(unsigned int i)
@@ -729,8 +729,8 @@ namespace _engineprivate
 		static std::string getClassName(const char* c)
 		{
 			std::string s(c);
-			unsigned int colon=s.find_last_of(':')-1;
-			unsigned int space=s.find_last_of(' ',colon)+1;
+			unsigned int colon=(unsigned int)s.find_last_of(':')-1;
+			unsigned int space=(unsigned int)s.find_last_of(' ',colon)+1;
 			return s.substr(space,colon-space);
 		}
 		template<class T>

@@ -980,9 +980,25 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 	while (std::getline(ss,ln,'\n'))
 	{
 		GLfloat offset=0;
+		int mode=0,modelength=0;
 		for (unsigned int i=0;i<ln.size();i++)
 		{
 			c=ln.at(i)<0?256-ln.at(i):ln.at(i);
+
+			if (modelength>0)
+			{
+				modelength--;
+				if (modelength==0)
+				mode=0;
+				continue;
+			}
+			else
+			if (c=='\x1b')
+			{
+				mode=1;
+				modelength=6;
+				continue;
+			}
 
 			if (c<0||c>=font->characters)
 			continue;
@@ -1037,6 +1053,13 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 					break;
 			}
 			posTrans[1]=(GLfloat)(y-size*scale+font->fonth*advscale+line*(font->lineh+lineSpacing)*advscale);
+			continue;
+		}
+		else
+		if (c=='\x1b'&&i+6<str.length())
+		{
+			setColor(hexStrToInt(str.substr(i+1,2))/255.0f,hexStrToInt(str.substr(i+3,2))/255.0f,hexStrToInt(str.substr(i+5,2))/255.0f,a);
+			i+=6;
 			continue;
 		}
 		texData[0]=texData[4]=(GLfloat)((c%16)*0.0625);
@@ -1574,10 +1597,6 @@ void EngineLayer::debugHandler()
 		debugToggleCollision();
 		if (getKeyPress(sf::Keyboard::Key::F7))
 		debugToggleTouchables();
-
-		if (getKeyPress(sf::Keyboard::Key::F1))
-		if (scene)
-		scene->restart();
 
 		if (getKeyPress(sf::Keyboard::Key::Numpad0))
 		{

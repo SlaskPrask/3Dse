@@ -18,19 +18,10 @@ inline static unsigned int *_sceneId()\
 	static unsigned int _id=_engine::obtainScnId();\
 	return &_id;\
 }\
-template<class T>\
-inline static void _restart(T *p)\
-{\
-	new T();\
-}\
 public:\
 virtual inline unsigned int sceneId()\
 {\
 	return *_sceneId();\
-}\
-virtual inline void restart()\
-{\
-	_restart(this);\
 }\
 virtual inline std::string sceneName()\
 {\
@@ -72,10 +63,6 @@ namespace _ENGINESPACE
 		virtual inline unsigned int sceneId()
 		{
 			return -1;
-		}
-		virtual inline void restart()
-		{
-			return;
 		}
 		inline void setSize(int w,int h)
 		{

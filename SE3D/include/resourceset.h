@@ -55,19 +55,19 @@ namespace _ENGINESPACE
 		}
 		inline unsigned int getFonts()
 		{
-			return fonts.size();
+			return (unsigned int)fonts.size();
 		}
 		inline unsigned int getSounds()
 		{
-			return sounds.size();
+			return (unsigned int)sounds.size();
 		}
 		inline unsigned int getSprites()
 		{
-			return sprites.size();
+			return (unsigned int)sprites.size();
 		}
 		inline unsigned int getItems()
 		{
-			return sprites.size()+sounds.size()+fonts.size();
+			return (unsigned int)(sprites.size()+sounds.size()+fonts.size());
 		}
 		inline bool isLoaded()
 		{

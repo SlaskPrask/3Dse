@@ -195,10 +195,8 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	int cellw=(int)cwidth+2;
 	int cellh=(int)cheight+2;
 
-	int texsizew=cwidth*16;
-	int texsizeh=cheight*16;
-	Log::log(to_string(texsizew));
-	Log::log(to_string(texsizeh));
+	int texsizew=(int)cwidth*16;
+	int texsizeh=(int)cheight*16;
 	
 	/* //RESULTS IN 1
 	int xoff=(int)((texsizew/16-cwidth)/2);
@@ -231,8 +229,8 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 
 		int ox=1+offx+face->glyph->bitmap_left;
 		int oy=1+offy+face->glyph->bitmap_top;
-		int px=(c%16)*cwidth;
-		int py=(int)(c/16)*texsizew*cheight;
+		int px= (int)((c%16)*cwidth);
+		int py=(c/16)*texsizew*(int)cheight;
 		for (int j=0;j<cheight;j++)
 		for (int i=0;i<cwidth;i++)
 		{

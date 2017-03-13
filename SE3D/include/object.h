@@ -108,7 +108,7 @@ namespace _ENGINESPACE
 		std::string _objname;
 		unsigned int _objid;
 		//virtual void _addInstance(Object *inst);
-		//virtual void _removeInstance(Object *inst);
+		//virtual void _removeInstance(Object *inst
 		Scene *_scene;
 		bool _tagRunValue, _tagDrawValue;
 		bool _destroyed;

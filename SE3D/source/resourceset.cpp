@@ -91,7 +91,7 @@ void ResourceSet::load(volatile bool threaded,volatile unsigned int *counter,vol
 	}
 	else
 	if (counter)
-	*counter+=fonts.size()+sprites.size()+sounds.size();
+	*counter+=(unsigned int)(fonts.size()+sprites.size()+sounds.size());
 	
 	loads++;
 }
