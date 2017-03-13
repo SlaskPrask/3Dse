@@ -41,7 +41,17 @@ inline static unsigned int *_objectId()\
 	static unsigned int _id=_engine::obtainObjId();\
 	return &_id;\
 }\
+static _engine::ObjectListing _listing(_objectName());\
+template<class T>\
+inline static Object* _newInstance(T *p)\
+{\
+	return new T();\
+}\
 public:\
+virtual inline Object* newInstance()\
+{\
+	return _newInstance(this);\
+}\
 virtual inline std::string objectName()\
 {\
 	return *_objectName();\
@@ -135,6 +145,10 @@ namespace _ENGINESPACE
 		double _x,_y;
 		
 		public:
+		inline virtual Object* newInstance()
+		{
+			return NULL;
+		}
 		virtual inline std::string objectName()
 		{
 			return "";
