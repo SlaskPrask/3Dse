@@ -18,6 +18,7 @@ inline static unsigned int *_sceneId()\
 	static unsigned int _id=_engine::obtainScnId();\
 	return &_id;\
 }\
+static _engine::SceneListing _listing(_sceneName());\
 template<class T>\
 inline static void _restart(T *p)\
 {\

@@ -845,6 +845,8 @@ namespace _engineprivate
 		void dumpDepthQueue();
 		void dumpDepthChangeQueue();
 		void dumpObj(Object *obj);
+		void dumpObjectListing();
+		void dumpSceneListing();
 		void debugToggleCollision();
 		void debugToggleTouchables();
 		void debugHandler();

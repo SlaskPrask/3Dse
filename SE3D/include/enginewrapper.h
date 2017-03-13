@@ -54,4 +54,34 @@ namespace _engine
 			mainFunction(f);
 		}
 	};
+
+	struct ObjectListing
+	{
+		inline static std::vector<std::string> *listing(std::string *name)
+		{
+			static std::vector<std::string> names;
+			if (name)
+				names.push_back(*name);
+			return &names;
+		}
+		ObjectListing(std::string *name)
+		{
+			listing(name);
+		}
+	};
+	struct SceneListing
+	{
+		inline static std::vector<std::string> *listing(std::string *name)
+		{
+			static std::vector<std::string> names;
+			if (name)
+				names.push_back(*name);
+			return &names;
+		}
+		SceneListing(std::string *name)
+		{
+			listing(name);
+		}
+	};
+
 }
