@@ -11,7 +11,6 @@ Hitbox::Hitbox()
 	object=0;
 }
 
-#include <iostream>//DEBUG
 int Hitbox::where(Collision* c)
 {
 	if (!inside(c))

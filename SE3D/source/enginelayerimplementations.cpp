@@ -974,7 +974,7 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 	squareData[5]=squareData[7]=yoff*(GLfloat)advscale+(GLfloat)(size*scale);
 	
 	std::vector<GLfloat> linew;
-	int c=0,lines=0;
+	unsigned int c=0,lines=0;
 	std::stringstream ss(str);
 	std::string ln;
 	while (std::getline(ss,ln,'\n'))
@@ -982,9 +982,7 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 		GLfloat offset=0;
 		for (unsigned int i=0;i<ln.size();i++)
 		{
-			c=ln.at(i);
-			if (c<0)
-			c=256-c;
+			c=ln.at(i)<0?256-ln.at(i):ln.at(i);
 
 			if (c<0||c>=font->characters)
 			continue;

@@ -67,12 +67,22 @@ namespace _ENGINESPACE
 	{
 		return (i>>(8*pos))&(0xFF);
 	}
+	template<>
+	inline char getByte<bool>(bool i,unsigned int pos)
+	{
+		return i?0x01:0x00;
+	}
 	template<class T>
 	inline T setByte(T i,char value,unsigned int pos=0)
 	{
 		T v=(((T)value)&0xFF)<<(8*pos);
 		T mask=~(0xFF<<(8*pos));
 		return v|((i)&mask);
+	}
+	template<>
+	inline bool setByte<bool>(bool i,char value,unsigned int pos)
+	{
+		return value!=0x00;
 	}
 	template<class T>
 	bool writeBytes(std::string *str,T value,unsigned int bytes=0)

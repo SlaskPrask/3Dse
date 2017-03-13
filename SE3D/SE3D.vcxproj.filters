@@ -165,6 +165,9 @@
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\menu.h">
       <Filter>Test\Game</Filter>
     </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\tutorial.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\source\camera.cpp">
@@ -285,6 +288,9 @@
       <Filter>Test\Game</Filter>
     </ClCompile>
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\menu.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\tutorial.cpp">
       <Filter>Test\Game</Filter>
     </ClCompile>
   </ItemGroup>

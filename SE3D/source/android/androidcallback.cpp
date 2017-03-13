@@ -247,8 +247,7 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	e->CallStaticIntMethod(c,m,str,size,charsizes,measures,widths,offs,totalchars);
 
 	jint *charsize=e->GetIntArrayElements(charsizes,0);
-	Log::log(to_string(charsize[0]));
-	Log::log(to_string(charsize[1]));
+
 	if (charsize[0]<=0||charsize[1]<=0)
 	{
 		Log::error("Resources",std::string("Unable to load font file \"")+s+"\"");

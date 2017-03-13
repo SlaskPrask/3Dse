@@ -3,7 +3,6 @@
 #include <list>
 #include <vector>
 #include <string>
-#include <sstream>//debug
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
