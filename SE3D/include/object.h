@@ -9,9 +9,40 @@
 #include <vector>
 #include <string>
 
+namespace _ENGINESPACE
+{
+	class Object;
+}
+
+namespace _engineprivate
+{
+	template<class T>
+	class _ObjectChild
+	{
+		Object *instance;
+		_ObjectChild(Object *i):instance(i)
+		{
+			T::_addInstance(instance);
+		}
+		~_ObjectChild()
+		{
+			T::_removeInstance(instance);
+		}
+	};
+}
+
+#define INHERITS(OBJECTCLASS) \
+private: \
+_engineprivate::_ObjectChild<OBJECTCLASS>(this);
+
 #define OBJECT \
 private:\
 friend class _engineprivate::EngineLayer;\
+static std::vector<Object*>* _child()\
+{\
+	static std::vector<Object*> i;\
+	return &i;\
+}\
 static std::vector<Object*>* _instance()\
 {\
 	static std::vector<Object*> i;\
@@ -41,17 +72,7 @@ inline static unsigned int *_objectId()\
 	static unsigned int _id=_engine::obtainObjId();\
 	return &_id;\
 }\
-static _engine::ObjectListing _listing(_objectName());\
-template<class T>\
-inline static Object* _newInstance(T *p)\
-{\
-	return new T();\
-}\
 public:\
-virtual inline Object* newInstance()\
-{\
-	return _newInstance(this);\
-}\
 virtual inline std::string objectName()\
 {\
 	return *_objectName();\

@@ -123,9 +123,6 @@
     <ClInclude Include="include\log.h">
       <Filter>Header Files\Back</Filter>
     </ClInclude>
-    <ClInclude Include="include\loader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\board.h">
       <Filter>Test\Game</Filter>
     </ClInclude>
@@ -166,6 +163,21 @@
       <Filter>Test\Game</Filter>
     </ClInclude>
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\tutorial.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="include\loader.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\sikal\app\src\main\jni\game\timer.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\sikal\app\src\main\jni\game\mainmenu.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\sikal\app\src\main\jni\game\title.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\sikal\app\src\main\jni\game\background.h">
       <Filter>Test\Game</Filter>
     </ClInclude>
   </ItemGroup>
@@ -242,9 +254,6 @@
     <ClCompile Include="source\scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\loader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\board.cpp">
       <Filter>Test\Game</Filter>
     </ClCompile>
@@ -292,6 +301,21 @@
     </ClCompile>
     <ClCompile Include="source\android\androidcallback.cpp">
       <Filter>Source Files\Android</Filter>
+    </ClCompile>
+    <ClCompile Include="source\loader.cpp">
+      <Filter>Source Files\Back</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\sikal\app\src\main\jni\game\timer.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\sikal\app\src\main\jni\game\mainmenu.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\sikal\app\src\main\jni\game\title.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\sikal\app\src\main\jni\game\background.cpp">
+      <Filter>Test\Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

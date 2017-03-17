@@ -192,18 +192,21 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 
 	cheight=meas[1];
 
-	int cellw=(int)cwidth+2;
-	int cellh=(int)cheight+2;
+	int wborder=(int)(cwidth/4);
+	int hborder=(int)(cheight/8);
+	if (wborder<1)
+	wborder=1;
+	if (hborder<1)
+	hborder=1;
 
-	int texsizew=(int)cwidth*16;
-	int texsizeh=(int)cheight*16;
+	int cellw=(int)cwidth+wborder*2;
+	int cellh=(int)cheight+hborder*2;
+
+	int texsizew=(int)cellw*16;
+	int texsizeh=(int)cellh*16;
 	
-	/* //RESULTS IN 1
-	int xoff=(int)((texsizew/16-cwidth)/2);
-	int yoff=(int)((texsizew/16-cheight)/2);
-	*/ //SO
-	int xoff=1;
-	int yoff=1;
+	int xoff=wborder;
+	int yoff=hborder;
 
 	GLubyte *data=new GLubyte[texsizew*texsizeh*2];//double bytes because contains color byte and alpha byte (c,a)GL_LUMINANCE_ALPHA not like 4x (r,g,b,a)GL_RGBA
 
@@ -225,24 +228,25 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 		bmp=&bmpg->bitmap;
 
 		int offx=(int)((face->glyph->metrics.horiBearingX>>6)+xoff);
-		int offy=(int)(cheight-1-meas[0]-1-(face->glyph->metrics.horiBearingY>>6)-yoff);
+		int offy=(int)(cellh-meas[0]-(face->glyph->metrics.horiBearingY>>6)-yoff);
 
-		int ox=1+offx+face->glyph->bitmap_left;
-		int oy=1+offy+face->glyph->bitmap_top;
-		int px= (int)((c%16)*cwidth);
-		int py=(c/16)*texsizew*(int)cheight;
-		for (int j=0;j<cheight;j++)
-		for (int i=0;i<cwidth;i++)
+		int ox=offx+face->glyph->bitmap_left;
+		int oy=offy+face->glyph->bitmap_top;
+		int px=(int)((c%16)*cellw);
+		int py=(c/16)*texsizew*(int)cellh;
+		for (int j=0;j<cellh;j++)
+		for (int i=0;i<cellw;i++)
 		{
 			//set two neighboring containers the same (c,a)
 			if (i<ox||i>=ox+(int)bmp->width
-				||  j<oy||j>=oy+(int)bmp->rows)
+			||  j<oy||j>=oy+(int)bmp->rows)
 			{
 				data[(py+px+i+j*(texsizew))*2]=0xFF;
-				data[(py+px+i+j*(texsizew))*2+1]=0;
+				data[(py+px+i+j*(texsizew))*2+1]=0x00;
 			}
 			else
 			{
+				
 				data[(py+px+i+j*(texsizew))*2]=0xFF;
 				data[(py+px+i+j*(texsizew))*2+1]=bmp->buffer[i-ox+bmp->width*(j-oy)];
 			}

@@ -65,7 +65,7 @@ namespace _ENGINESPACE
 	template<class T>
 	inline char getByte(T i,unsigned int pos=0)
 	{
-		return (i>>(8*pos))&(0xFF);
+		return (i>>(8*(T)pos))&((T)0xFF);
 	}
 	template<>
 	inline char getByte<bool>(bool i,unsigned int pos)
@@ -76,7 +76,8 @@ namespace _ENGINESPACE
 	inline T setByte(T i,char value,unsigned int pos=0)
 	{
 		T v=(((T)value)&0xFF)<<(8*pos);
-		T mask=~(0xFF<<(8*pos));
+		T n=((T)0xFF<<(8*(T)pos))^(~((T)0x00));
+		T mask=(~((T)0))&n;
 		return v|((i)&mask);
 	}
 	template<>
@@ -85,7 +86,7 @@ namespace _ENGINESPACE
 		return value!=0x00;
 	}
 	template<class T>
-	bool writeBytes(std::string *str,T value,unsigned int bytes=0)
+	inline bool writeBytes(std::string *str,T value,unsigned int bytes=0)
 	{
 		if (bytes==0)
 		bytes=sizeof(T);
@@ -95,8 +96,21 @@ namespace _ENGINESPACE
 
 		return 1;
 	}
+	inline bool ignoreBytes(std::string *str,unsigned int bytes=0)
+	{
+		if (str->length()<bytes)
+		{
+			*str="";
+			return 0;
+		}
+		else
+		{
+			str->erase(0,bytes);
+			return 1;
+		}
+	}
 	template<class T>
-	bool readBytes(std::string *str,T *value,unsigned int bytes=0)
+	inline bool readBytes(std::string *str,T *value,unsigned int bytes=0)
 	{
 		if (bytes==0)
 		bytes=sizeof(T);

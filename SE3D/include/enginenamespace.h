@@ -178,20 +178,35 @@ namespace _ENGINESPACE
 	{
 		return getResourceSet(i);
 	}
-	
-	inline void drawText(Font *font,const std::string &str,double x,double y,double size,double r,double g,double b,double a,double lineSpacing=0)
+	inline void getTextSize(Font *font,const std::string &str,double size,double *w,double *h,double lineSpacing=0)
+	{
+		EngineLayer::instance()->getTextMetrics(font,str,size,lineSpacing,w,h);
+	}
+	inline double getTextWidth(Font *font,const std::string &str,double size)
+	{
+		double w,h;
+		EngineLayer::instance()->getTextMetrics(font,str,size,0,&w,&h);
+		return w;
+	}
+	inline double getTextHeight(Font *font,const std::string &str,double size,double lineSpacing=0)
+	{
+		double w,h;
+		EngineLayer::instance()->getTextMetrics(font,str,size,lineSpacing,&w,&h);
+		return h;
+	}
+	inline void drawText(Font *font,const std::string &str,double x,double y,double size,double r=1,double g=1,double b=1,double a=1,double lineSpacing=0)
 	{
 		EngineLayer::instance()->drawText(font,str,x,y,size,lineSpacing,r,g,b,a,_FONT_ALIGN_LEFT);
 	}
-	inline void drawTextLeft(Font *font,const std::string &str,double x,double y,double size,double r,double g,double b,double a,double lineSpacing=0)
+	inline void drawTextLeft(Font *font,const std::string &str,double x,double y,double size,double r=1,double g=1,double b=1,double a=1,double lineSpacing=0)
 	{
 		drawText(font,str,x,y,size,r,g,b,a,lineSpacing);
 	}
-	inline void drawTextCentered(Font *font,const std::string &str,double x,double y,double size,double r,double g,double b,double a,double lineSpacing=0)
+	inline void drawTextCentered(Font *font,const std::string &str,double x,double y,double size,double r=1,double g=1,double b=1,double a=1,double lineSpacing=0)
 	{
 		EngineLayer::instance()->drawText(font,str,x,y,size,lineSpacing,r,g,b,a,_FONT_ALIGN_MIDDLE);
 	}
-	inline void drawTextRight(Font *font,const std::string &str,double x,double y,double size,double r,double g,double b,double a,double lineSpacing=0)
+	inline void drawTextRight(Font *font,const std::string &str,double x,double y,double size,double r=1,double g=1,double b=1,double a=1,double lineSpacing=0)
 	{
 		EngineLayer::instance()->drawText(font,str,x,y,size,lineSpacing,r,g,b,a,_FONT_ALIGN_RIGHT);
 	}

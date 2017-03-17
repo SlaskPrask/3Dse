@@ -16,9 +16,12 @@ int EngineLayer::event(int id, int size, int *value)
 		default:
 			return 0;
 		case 0://surface create
-			instance()->contextLost();
-			instance()->reloadSprites();
-			instance()->reloadFonts();
+			if (!instance()->checkTextures())
+			{
+				instance()->contextLost();
+				instance()->reloadSprites();
+				instance()->reloadFonts();
+			}
 			return 0;
 		case 1://application close
 			/*not used in android, used in desktop callback*/

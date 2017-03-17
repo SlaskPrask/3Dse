@@ -73,3 +73,7 @@ inspect font textures
 hidden assets
 
 same way android does main, do listing of objects and scenes
+
+realign fonts, bits visible (border of 2 not enough)
+
+icons from assets

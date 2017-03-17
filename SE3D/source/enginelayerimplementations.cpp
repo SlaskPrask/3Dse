@@ -75,6 +75,7 @@ EngineLayer::EngineLayer()
 	pullResources=0;
 
 	//graphics
+	defaultTexture=0;
 	fps=60;
 	defaultCamera=new Camera();
 	activeCamera=defaultCamera;
@@ -243,6 +244,32 @@ EngineLayer::EngineLayer()
 	#endif
 
 	Log::log("Engine","Initialized");
+}
+
+bool EngineLayer::checkTextures()
+{
+	GLboolean res;
+	return glIsTexture(defaultTexture);
+}
+
+void EngineLayer::updateDefaultTexture()
+{
+	if (!checkTextures())
+	{
+		GLubyte data[16*16*4]={0xFF};
+		for(int i=0;i<16;i++)
+		for (int j=0;j<16;j++)
+		{
+			if ((j<8&&i<8)||(j>=8&&i>=8))
+			{
+				data[(i+j*16)*4+0]=0x00;
+				data[(i+j*16)*4+1]=0x00;
+				data[(i+j*16)*4+2]=0x00;
+				data[(i+j*16)*4+3]=0xFF;
+			}
+		}
+		_engine::generateTexture(&defaultTexture,16,16,data,GL_RGBA);
+	}
 }
 
 int EngineLayer::runGame(int argc,char* argv[])
@@ -536,6 +563,8 @@ void EngineLayer::reapplyGL()
 
 void EngineLayer::initGL()
 {
+	updateDefaultTexture();
+
 	#ifndef ANDROID
 	glewExperimental=TRUE;
 	GLenum result=glewInit();
@@ -955,24 +984,23 @@ void EngineLayer::drawSpriteFinal(Sprite* sprite,double x,double y,double w,doub
 void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,double size,double lineSpacing,double r,double g,double b,double a,int align)
 {
 	if (font==NULL)
-	return;
+		return;
 
 	setColor(r,g,b,a);
 	setRotation(0);
-	
-	GLfloat lineHeight=(GLfloat)font->lineh;
+
 	GLfloat scale=(GLfloat)font->ratio;
 	GLfloat heightmultiplier=(GLfloat)font->yratio;
 	GLfloat advscale=(GLfloat)(size/(double)font->size);
 	GLfloat xoff=(GLfloat)font->xoff;
 	GLfloat yoff=(GLfloat)font->yoff;
-	
+
 	textured=1;
 	squareData[0]=squareData[4]=xoff*(GLfloat)advscale;
 	squareData[1]=squareData[3]=yoff*(GLfloat)advscale-(GLfloat)(size*scale)*(heightmultiplier-1);
 	squareData[2]=squareData[6]=xoff*(GLfloat)advscale+(GLfloat)(size*scale);
 	squareData[5]=squareData[7]=yoff*(GLfloat)advscale+(GLfloat)(size*scale);
-	
+
 	std::vector<GLfloat> linew;
 	unsigned int c=0,lines=0;
 	std::stringstream ss(str);
@@ -989,29 +1017,29 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 			{
 				modelength--;
 				if (modelength==0)
-				mode=0;
+					mode=0;
 				continue;
 			}
 			else
-			if (c=='\x1b')
-			{
-				mode=1;
-				modelength=6;
-				continue;
-			}
+				if (c=='\x1b')
+				{
+					mode=1;
+					modelength=6;
+					continue;
+				}
 
 			if (c<0||c>=font->characters)
-			continue;
-			
+				continue;
+
 			offset+=(GLfloat)font->charw[c];
 		}
 		linew.push_back(offset*advscale);
 		lines++;
 	}
-	
+
 	if (lines==0)
-	align=0;
-	
+		align=0;
+
 	int line=0;
 	switch (align)
 	{
@@ -1031,11 +1059,11 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 	{
 		c=str.at(i);
 		if (c<0)
-		c=256-c;
-		
+			c=256-c;
+
 		if (c<0||c>=font->characters)
-		continue;
-		
+			continue;
+
 		if (c=='\n')
 		{
 			line++;
@@ -1067,7 +1095,7 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 		texData[2]=texData[6]=(GLfloat)((c%16+1)*0.0625);
 		texData[5]=texData[7]=(GLfloat)(floor((c%_FONT_SET_CHARACTERS)/16+1)*0.0625);
 		glActiveTexture(GL_TEXTURE0);
-		
+
 		font->bind((unsigned int)floor((double)c/(double)_FONT_SET_CHARACTERS));
 
 		glUniform1i(drawTex,0);
@@ -1076,8 +1104,61 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 		glDrawArrays(GL_TRIANGLE_STRIP,0,4);
 		posTrans[0]+=(GLfloat)(font->charw[c]*advscale);
 	}
-	
+
 	restoreColor();
+}
+
+void EngineLayer::getTextMetrics(Font *font,const std::string &str,double size,double lineSpacing,double *w,double *h)
+{
+	if (font==NULL)
+	{
+		*w=0;
+		*h=0;
+		return;
+	}
+
+	GLfloat scale=(GLfloat)font->ratio;
+	GLfloat advscale=(GLfloat)(size/(double)font->size);
+
+	GLfloat textw=0;
+	unsigned int c=0,lines=0;
+	std::stringstream ss(str);
+	std::string ln;
+	while (std::getline(ss,ln,'\n'))
+	{
+		GLfloat offset=0;
+		int mode=0,modelength=0;
+		for (unsigned int i=0;i<ln.size();i++)
+		{
+			c=ln.at(i)<0?256-ln.at(i):ln.at(i);
+
+			if (modelength>0)
+			{
+				modelength--;
+				if (modelength==0)
+					mode=0;
+				continue;
+			}
+			else
+			if (c=='\x1b')
+			{
+				mode=1;
+				modelength=6;
+				continue;
+			}
+
+			if (c<0||c>=font->characters)
+				continue;
+
+			offset+=(GLfloat)font->charw[c];
+		}
+		if (textw<offset*advscale)
+		textw=offset*advscale;
+		lines++;
+	}
+
+	*h=lines*(font->lineh+lineSpacing)*advscale;
+	*w=(double)textw;
 }
 
 void EngineLayer::setGameStartFunc(void (*func)())
@@ -1287,7 +1368,7 @@ void EngineLayer::deleteAllSets()
 	if (resourcesets[i]!=NULL)
 	{
 		if (resourcesets[i]->loads!=0)
-		Log::log("Engine","Resource set "+to_string(resourcesets[i]->engine_id)+"("+to_string(resourcesets[i])+") left loaded");
+		Log::notify("Engine","Resource set "+to_string(resourcesets[i]->engine_id)+"("+to_string(resourcesets[i])+") left loaded");
 		resourcesets[i]->_deathMark=1;
 		delete resourcesets[i];
 	}
@@ -1436,16 +1517,16 @@ void EngineLayer::dumpObjectDepths()
 	DepthItem *di,*diNext;
 	int i=0;
 	if (di=firstDepth)
-		while (di)
-		{
-			diNext = di->getNext();
-			std::ostringstream s;
-			s << to_string(i) << ": " << di << " " << di->get()->objectName();
-			s << " (" << di->get() << ":" << di->getDepth() << ") ";
-			Log::log("Debug",s.str().c_str());
-			i++;
-			di=diNext;
-		}
+	while (di)
+	{
+		diNext = di->getNext();
+		std::ostringstream s;
+		s << to_string(i) << ": " << di << " " << di->get()->objectName();
+		s << " (" << di->get() << ":" << di->getDepth() << ") ";
+		Log::log("Debug",s.str().c_str());
+		i++;
+		di=diNext;
+	}
 
 	Log::log("Debug","");
 }

@@ -180,6 +180,7 @@ namespace _engineprivate
 		#ifndef ANDROID
 		FT_Library *fontLib;
 		#endif
+		GLuint defaultTexture;
 		int fps;
 		GLfloat ortho[16],rot[16];
 		GLfloat posOffset[2],posTrans[2],halfsize[2];
@@ -607,6 +608,8 @@ namespace _engineprivate
 		}
 		void drawBegin();
 		void drawEnd();
+		bool checkTextures();
+		void updateDefaultTexture();
 		#ifndef ANDROID
 		inline FT_Library* getFontLib()
 		{
@@ -833,6 +836,7 @@ namespace _engineprivate
 		}
 		//void drawSpritePolyTex(Sprite* sprite,double x1,double y1,double x2,double y2,double x3,double y3,double texx1,double texy1,double texx2,double texy2,double texx3,double texy3,double rot,double r,double g,double b,double a);
 		void drawText(Font *font,const std::string &str,double x,double y,double size,double lineSpacing,double r,double g,double b,double a,int align=0);
+		void getTextMetrics(Font *font,const std::string &str,double size,double lineSpacing,double *w,double *h);
 
 		//debug
 		#ifdef DEBUG

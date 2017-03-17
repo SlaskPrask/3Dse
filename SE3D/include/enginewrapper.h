@@ -1,7 +1,7 @@
 #pragma once
 
 #include "enginesettings.h"
-	#include <string>
+#include <string>
 #include <sstream>
 
 #include "platformgraphics.h"
