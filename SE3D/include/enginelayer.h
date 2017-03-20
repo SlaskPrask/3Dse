@@ -803,6 +803,10 @@ namespace _engineprivate
 			pullResources=1;
 			loadlock.unlock();
 		}
+		bool openURL(const std::string &uri)
+		{
+			return CallbackOpenURL(uri);
+		}
 		inline bool fileExists(const std::string &file)
 		{
 			return CallbackExistsFile(workingDirectory(file));

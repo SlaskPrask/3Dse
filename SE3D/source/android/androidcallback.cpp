@@ -343,6 +343,16 @@ void _engineprivate::CallbackSetFPS(int fps)
 	e->CallStaticVoidMethod(c,m,fps);
 }
 
+bool _engineprivate::CallbackOpenURL(const std::string &uri)
+{
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
+
+	jmethodID m=e->GetStaticMethodID(c,"openURL","(Ljava/lang/String;)I");
+	int i=e->CallStaticIntMethod(c,m,fps);
+	return i!=0;
+}
+
 int _engineprivate::CallbackLoadSound(const std::string &s)
 {
 	JNIEnv *e=_engineprivate::EngineLayer::getEnv();

@@ -180,6 +180,15 @@
     <ClInclude Include="E:\Oma\Android\sikal\app\src\main\jni\game\background.h">
       <Filter>Test\Game</Filter>
     </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\announcement.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\statsscreen.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\statsdisplay.h">
+      <Filter>Test\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\camera.cpp">
@@ -315,6 +324,15 @@
       <Filter>Test\Game</Filter>
     </ClCompile>
     <ClCompile Include="E:\Oma\Android\sikal\app\src\main\jni\game\background.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\announcement.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\statsscreen.cpp">
+      <Filter>Test\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\statsdisplay.cpp">
       <Filter>Test\Game</Filter>
     </ClCompile>
   </ItemGroup>

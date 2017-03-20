@@ -91,7 +91,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>..\Dependencies\lib\glew32s.lib;..\Dependencies\lib\freeglut.lib;..\Dependencies\lib\sfml-main-d.lib;..\Dependencies\lib\sfml-system-d.lib;..\Dependencies\lib\sfml-window-d.lib;..\Dependencies\lib\sfml-graphics-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\Dependencies\lib\glew32s.lib;..\Dependencies\lib\freeglut.lib;..\Dependencies\lib\sfml-main-d.lib;..\Dependencies\lib\sfml-system-d.lib;..\Dependencies\lib\sfml-window-d.lib;..\Dependencies\lib\sfml-graphics-d.lib;..\Dependencies\lib\sfml-audio-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Console</SubSystem>
@@ -119,7 +119,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>..\Dependencies\lib\glew32s.lib;..\Dependencies\lib\freeglut.lib;..\Dependencies\lib\sfml-main.lib;..\Dependencies\lib\sfml-system.lib;..\Dependencies\lib\sfml-window.lib;..\Dependencies\lib\sfml-graphics.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\Dependencies\lib\glew32s.lib;..\Dependencies\lib\freeglut.lib;..\Dependencies\lib\sfml-main.lib;..\Dependencies\lib\sfml-system.lib;..\Dependencies\lib\sfml-window.lib;..\Dependencies\lib\sfml-graphics.lib;..\Dependencies\lib\sfml-audio.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
@@ -142,6 +142,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\announcement.h" />
     <ClInclude Include="E:\Oma\Android\sikal\app\src\main\jni\game\background.h" />
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\board.h" />
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\breaking.h" />
@@ -156,6 +157,8 @@
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\menu.h" />
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\piece.h" />
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\point.h" />
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\statsdisplay.h" />
+    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\statsscreen.h" />
     <ClInclude Include="E:\Oma\Android\sikal\app\src\main\jni\game\timer.h" />
     <ClInclude Include="E:\Oma\Android\sikal\app\src\main\jni\game\title.h" />
     <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\tutorial.h" />
@@ -193,6 +196,7 @@
     <ClInclude Include="include\platform.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\announcement.cpp" />
     <ClCompile Include="E:\Oma\Android\sikal\app\src\main\jni\game\background.cpp" />
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\board.cpp" />
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\breaking.cpp" />
@@ -208,6 +212,8 @@
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\menu.cpp" />
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\piece.cpp" />
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\point.cpp" />
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\statsdisplay.cpp" />
+    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\statsscreen.cpp" />
     <ClCompile Include="E:\Oma\Android\sikal\app\src\main\jni\game\timer.cpp" />
     <ClCompile Include="E:\Oma\Android\sikal\app\src\main\jni\game\title.cpp" />
     <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\tutorial.cpp" />

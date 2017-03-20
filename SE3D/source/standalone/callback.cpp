@@ -303,6 +303,12 @@ void _engineprivate::CallbackSetFPS(int fps)
 	/*empty, handled on the inside*/
 }
 
+bool _engineprivate::CallbackOpenURL(const std::string &uri)
+{
+	//TODO
+	return 0;
+}
+
 int _engineprivate::CallbackLoadSound(const std::string &s)
 {
 	//TODO

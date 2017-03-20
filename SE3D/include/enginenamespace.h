@@ -377,7 +377,10 @@ namespace _ENGINESPACE
 	{
 		return textHeight(font,str.c_str(),size,lineSpacing);
 	}*/
-
+	inline bool openURL(const std::string &uri)
+	{
+		return EngineLayer::instance()->openURL(uri);
+	}
 	int getSceneWidth();
 	int getSceneHeight();
 	inline double getFrameTime()
