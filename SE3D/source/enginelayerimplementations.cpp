@@ -81,10 +81,13 @@ EngineLayer::EngineLayer()
 	activeCamera=defaultCamera;
 	queueCamera=0;
 	reqWidth=reqHeight=width=height=1;
+	orientation=2;
 	#ifndef ANDROID
+	windowType=-1;
 	defaultResolutionWidth=sf::VideoMode::getDesktopMode().width;
 	defaultResolutionHeight=sf::VideoMode::getDesktopMode().height;
 	#else
+	windowType=0;
 	defaultResolutionWidth=0;
 	defaultResolutionHeight=0;
 	#endif
@@ -398,19 +401,49 @@ void EngineLayer::closeGraphics()
 	#endif
 }
 
+void EngineLayer::setOrientation(int orientation)
+{
+	this->orientation=orientation;
+	CallbackSetOrientation(orientation);
+}
+
+bool EngineLayer::setFullscreen()
+{
+	if (setFullscreen(defaultResolutionWidth,defaultResolutionHeight))
+	{
+		windowType=2;
+		return 1;
+	}
+	else
+	return 0;
+}
+
+bool EngineLayer::setWindowed()
+{
+	#ifdef ANDROID
+	if (CallbackUnsetFullscreen())
+	{
+		windowType=0;
+		return 1;
+	}
+	else
+	return 0;
+	#endif
+	return 0;
+}
+
 bool EngineLayer::setFullscreen(int w,int h)
 {
 	reqWidth=w;
 	reqHeight=h;
 	#ifdef ANDROID
-	if (w>h)
-	setOrientation(0);
+	if (CallbackSetFullscreen())
+	{
+		windowType=2;
+		return 1;
+	}
 	else
-	if (h>w)
-	setOrientation(1);
-	else
-	setOrientation(2);
-	return CallbackSetFullscreen();
+	return 0;
 	#else
 	bool valid=0;
 	for (unsigned int i=0;i<resolutions.size();i++)
@@ -438,12 +471,14 @@ bool EngineLayer::setFullscreen(int w,int h)
 	if (!window)
 	{
 		Log::error("Graphics","Unable to go fullscreen, window failed");
+		windowType=-1;
 		return 0;
 	}
 	else
 	{
 		Log::log("Graphics",std::string("Changed to fullscreen ")+to_string(w)+","+to_string(h));
 		setSize(w,h);
+		windowType=2;
 		return 1;
 	}
 	#endif
@@ -454,14 +489,13 @@ bool EngineLayer::setWindowed(int w,int h)
 	reqWidth=w;
 	reqHeight=h;
 	#ifdef ANDROID
-	if (w>h)
-	setOrientation(0);
+	if (CallbackUnsetFullscreen())
+	{
+		windowType=0;
+		return 1;
+	}
 	else
-	if (h>w)
-	setOrientation(1);
-	else
-	setOrientation(2);
-	return CallbackUnsetFullscreen();
+	return 0;
 	#else
 	closeGraphics();
 
@@ -475,12 +509,14 @@ bool EngineLayer::setWindowed(int w,int h)
 	if (!window)
 	{
 		Log::error("Graphics","Unable to go windowed, window failed");
+		windowType=-1;
 		return 0;
 	}
 	else
 	{
 		Log::log("Graphics",std::string("Changed to windowed ")+to_string(w)+","+to_string(h));
 		setSize(w,h);
+		windowType=0;
 		return 1;
 	}
 	#endif
@@ -491,7 +527,13 @@ bool EngineLayer::setFullscreenWindowed()
 	reqWidth=defaultResolutionWidth;
 	reqHeight=defaultResolutionHeight;
 	#ifdef ANDROID
-	return CallbackSetFullscreen();
+	if (CallbackSetFullscreen())
+	{
+		windowType=1;
+		return 1;
+	}
+	else
+	return 0;
 	#else
 	
 
@@ -509,12 +551,14 @@ bool EngineLayer::setFullscreenWindowed()
 	if (!window)
 	{
 		Log::error("Graphics","Unable to go fullscreen windowed, window failed");
+		windowType=-1;
 		return 0;
 	}
 	else
 	{
 		Log::log("Graphics",std::string("Changed to fullscreen windowed ")+to_string(defaultResolutionWidth)+","+to_string(defaultResolutionHeight));
 		setSize(defaultResolutionWidth,defaultResolutionHeight);
+		windowType=1;
 		return 1;
 	}
 	#endif
@@ -552,7 +596,27 @@ void EngineLayer::reapplyGL()
 	}
 	else
 	Log::error("Graphics",std::string("Setting graphics without a window "));
+	#else
+	setVSync(vsync);
+	setFPS(fps);
+	setMouseCursor(cursorOn);
+
+	switch (windowType)
+	{
+		default:
+			break;
+		case 0:
+			setWindowed();
+			break;
+		case 1:
+			setFullscreenWindowed();
+			break;
+		case 2:
+			setFullscreen();
+			break;
+	}
 	#endif
+	CallbackSetOrientation(orientation);
 
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	DEBUGFUNC(printGLErrors("GL Alpha"));

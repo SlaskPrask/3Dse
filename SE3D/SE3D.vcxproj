@@ -91,7 +91,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>..\Dependencies\lib\glew32s.lib;..\Dependencies\lib\freeglut.lib;..\Dependencies\lib\sfml-main-d.lib;..\Dependencies\lib\sfml-system-d.lib;..\Dependencies\lib\sfml-window-d.lib;..\Dependencies\lib\sfml-graphics-d.lib;..\Dependencies\lib\sfml-audio-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\Dependencies\lib\glew32s.lib;..\Dependencies\lib\freeglut.lib;..\Dependencies\lib\sfml-main-d.lib;..\Dependencies\lib\sfml-system-d.lib;..\Dependencies\lib\sfml-window-d.lib;..\Dependencies\lib\sfml-graphics-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Console</SubSystem>
@@ -119,7 +119,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>..\Dependencies\lib\glew32s.lib;..\Dependencies\lib\freeglut.lib;..\Dependencies\lib\sfml-main.lib;..\Dependencies\lib\sfml-system.lib;..\Dependencies\lib\sfml-window.lib;..\Dependencies\lib\sfml-graphics.lib;..\Dependencies\lib\sfml-audio.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\Dependencies\lib\glew32s.lib;..\Dependencies\lib\freeglut.lib;..\Dependencies\lib\sfml-main.lib;..\Dependencies\lib\sfml-system.lib;..\Dependencies\lib\sfml-window.lib;..\Dependencies\lib\sfml-graphics.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>

@@ -182,6 +182,8 @@ namespace _engineprivate
 		#endif
 		GLuint defaultTexture;
 		int fps;
+		int windowType;
+		int orientation;
 		GLfloat ortho[16],rot[16];
 		GLfloat posOffset[2],posTrans[2],halfsize[2];
 		GLfloat colorSet[4],colorizationSet[4];
@@ -703,24 +705,12 @@ namespace _engineprivate
 			#endif
 		}
 		void closeGraphics();
-		bool setFullscreen()
-		{
-			return setFullscreen(defaultResolutionWidth,defaultResolutionHeight);
-		}
-		bool setWindowed()
-		{
-			#ifdef ANDROID
-			return CallbackUnsetFullscreen();
-			#endif
-			return 0;
-		}
+		bool setFullscreen();
+		bool setWindowed();
 		bool setFullscreen(int w,int h);
 		bool setWindowed(int w,int h);
 		bool setFullscreenWindowed();
-		inline void setOrientation(int orientation)
-		{
-			CallbackSetOrientation(orientation);
-		}
+		void setOrientation(int orientation);
 		inline int getWidth()
 		{
 			return width;
