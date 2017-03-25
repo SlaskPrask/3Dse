@@ -213,7 +213,7 @@ namespace _engineprivate
 		bool cursorOn;
 		bool vsync;
 		std::string title;
-		
+		std::string iconfile;
 
 		public:
 		inline static EngineLayer* instance()
@@ -661,6 +661,7 @@ namespace _engineprivate
 		void setColorization(double r,double g,double b);
 		void setMouseCursor(bool enabled);
 		void setTitle(const std::string &label);
+		void setIcon(const std::string &file);
 		void setVSync(bool enabled);
 		inline bool getMouseCursor()
 		{

@@ -152,6 +152,11 @@ void _engineprivate::CallbackSetTitle(const std::string &s)
 	e->DeleteLocalRef(str);
 }
 
+void _engineprivate::CallbackSetIcon(const std::string &s)
+{
+	//TODO
+}
+
 void _engineprivate::CallbackPrintLog(const std::string &s)
 {
 	JNIEnv *e=_engineprivate::EngineLayer::getEnv();

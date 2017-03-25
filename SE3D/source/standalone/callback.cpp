@@ -11,6 +11,22 @@ void CallbackSetTitle(const std::string &s)
 	/*empty, handled on the inside*/
 }
 
+void _engineprivate::CallbackSetIcon(const std::string &s)
+{
+	sf::Window *window=EngineLayer::instance()->getWindow();
+	if (!window)
+	return;
+
+	sf::Image image;
+	if (!image.loadFromFile(s))
+	{
+		Log::error("Resources",std::string("Unable to load image file \"")+s+"\" for icon");
+		return;
+	}
+
+	window->setIcon(image.getSize().x,image.getSize().y,image.getPixelsPtr());
+}
+
 bool _engineprivate::CallbackExistsFile(const std::string &f)
 {
 	bool ret=0;

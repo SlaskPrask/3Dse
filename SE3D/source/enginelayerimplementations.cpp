@@ -188,6 +188,7 @@ EngineLayer::EngineLayer()
 	#endif
 	vsync=1;
 	title=_DEFAULT_TITLE;
+	iconfile="";
 	cursorOn=1;
 	
 	//engine
@@ -251,8 +252,7 @@ EngineLayer::EngineLayer()
 
 bool EngineLayer::checkTextures()
 {
-	GLboolean res;
-	return glIsTexture(defaultTexture);
+	return (glIsTexture(defaultTexture)!=0);
 }
 
 void EngineLayer::updateDefaultTexture()
@@ -397,6 +397,8 @@ void EngineLayer::closeGraphics()
 	return;
 	DEBUGFUNC(Log::log("Graphics","Closing graphics"));
 	window->close();
+	delete window;
+	window=0;
 	printGLErrors("Closing");
 	#endif
 }
@@ -477,6 +479,8 @@ bool EngineLayer::setFullscreen(int w,int h)
 	else
 	{
 		Log::log("Graphics",std::string("Changed to fullscreen ")+to_string(w)+","+to_string(h));
+		if (iconfile!="")
+		CallbackSetIcon(iconfile);
 		setSize(w,h);
 		windowType=2;
 		return 1;
@@ -515,6 +519,8 @@ bool EngineLayer::setWindowed(int w,int h)
 	else
 	{
 		Log::log("Graphics",std::string("Changed to windowed ")+to_string(w)+","+to_string(h));
+		if (iconfile!="")
+		CallbackSetIcon(iconfile);
 		setSize(w,h);
 		windowType=0;
 		return 1;
@@ -557,6 +563,8 @@ bool EngineLayer::setFullscreenWindowed()
 	else
 	{
 		Log::log("Graphics",std::string("Changed to fullscreen windowed ")+to_string(defaultResolutionWidth)+","+to_string(defaultResolutionHeight));
+		if (iconfile!="")
+		CallbackSetIcon(iconfile);
 		setSize(defaultResolutionWidth,defaultResolutionHeight);
 		windowType=1;
 		return 1;
@@ -1507,13 +1515,22 @@ void EngineLayer::setVSync(bool enabled)
 
 void EngineLayer::setTitle(const std::string &label)
 {
-	#ifndef ANDROID
 	title=label;
+	#ifndef ANDROID
 	if (window)
 	window->setTitle(title);
 	#else
 	CallbackSetTitle(title);
 	#endif
+}
+
+void EngineLayer::setIcon(const std::string &file)
+{
+	iconfile=file;
+	#ifndef ANDROID
+	if (window)
+	#endif
+	CallbackSetIcon(resourceDirectory(file));
 }
 
 double EngineLayer::strToD(const std::string &str)
@@ -1540,8 +1557,6 @@ EngineLayer::~EngineLayer()
 	if (window)
 	{
 		closeGraphics();
-		delete window;
-		window=0;
 	}
 	if (fontLib)
 	{

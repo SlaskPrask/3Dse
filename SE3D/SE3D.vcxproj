@@ -25,13 +25,13 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -70,10 +70,16 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Linkage-freeglut>static</Linkage-freeglut>
     <OutDir>$(SolutionDir)\..\$(Configuration)\</OutDir>
+    <TargetName>$(ProjectName)-d</TargetName>
+    <Linkage-freetype>static</Linkage-freetype>
+    <Linkage-glew>static</Linkage-glew>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Linkage-freeglut>static</Linkage-freeglut>
     <OutDir>$(SolutionDir)\..\$(Configuration)\</OutDir>
+    <Linkage-freetype>
+    </Linkage-freetype>
+    <Linkage-glew>static</Linkage-glew>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Linkage-freetype>static</Linkage-freetype>
@@ -88,13 +94,15 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\Dependencies\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DEBUG;GLEW_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <AdditionalDependencies>..\Dependencies\lib\glew32s.lib;..\Dependencies\lib\freeglut.lib;..\Dependencies\lib\sfml-main-d.lib;..\Dependencies\lib\sfml-system-d.lib;..\Dependencies\lib\sfml-window-d.lib;..\Dependencies\lib\sfml-graphics-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Console</SubSystem>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -114,7 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\Dependencies\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -123,6 +131,8 @@
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -142,26 +152,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\announcement.h" />
-    <ClInclude Include="E:\Oma\Android\sikal\app\src\main\jni\game\background.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\board.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\breaking.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\button.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\fade.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\falling.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\game.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\intro.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\intrologo.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\level.h" />
-    <ClInclude Include="E:\Oma\Android\sikal\app\src\main\jni\game\mainmenu.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\menu.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\piece.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\point.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\statsdisplay.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\statsscreen.h" />
-    <ClInclude Include="E:\Oma\Android\sikal\app\src\main\jni\game\timer.h" />
-    <ClInclude Include="E:\Oma\Android\sikal\app\src\main\jni\game\title.h" />
-    <ClInclude Include="E:\Oma\Android\Sikal\app\src\main\jni\game\tutorial.h" />
     <ClInclude Include="include\androidnames.h" />
     <ClInclude Include="include\animation.h" />
     <ClInclude Include="include\animationdata.h" />
@@ -196,27 +186,6 @@
     <ClInclude Include="include\platform.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\announcement.cpp" />
-    <ClCompile Include="E:\Oma\Android\sikal\app\src\main\jni\game\background.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\board.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\breaking.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\button.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\fade.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\falling.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\game.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\intro.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\intrologo.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\level.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\main.cpp" />
-    <ClCompile Include="E:\Oma\Android\sikal\app\src\main\jni\game\mainmenu.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\menu.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\piece.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\point.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\statsdisplay.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\statsscreen.cpp" />
-    <ClCompile Include="E:\Oma\Android\sikal\app\src\main\jni\game\timer.cpp" />
-    <ClCompile Include="E:\Oma\Android\sikal\app\src\main\jni\game\title.cpp" />
-    <ClCompile Include="E:\Oma\Android\Sikal\app\src\main\jni\game\tutorial.cpp" />
     <ClCompile Include="source\android\android.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>

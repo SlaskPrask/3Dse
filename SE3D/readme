@@ -1,5 +1,19 @@
-Current deployment (no lib):
-use release build
-no -DDEBUG
-include dlls: sfml-graphics-2.dll sfml-system-2.dll sfml-window-2.dll 
-freetype271.dll msvcp140.dll vcruntime140.dll
+Current deployment:
+
+debug:
+ optional define
+  -DDEBUG
+ runtime library
+  /MTd
+ link
+  freeglut.lib;freetype271.lib;glew32s.lib;sfml-main-d.lib;sfml-system-d.lib;sfml-window-d.lib;sfml-graphics-d.lib;SE3D-d.lib;%(AdditionalDependencies)
+ required
+  freetype271.dll, sfml-graphics-d-2.dll, sfml-window-d-2.dll, sfml-audio-d-2.dll, sfml-system-d-2.dll, msvcp140.dll, vcruntime140.dll
+
+release:
+ runtime library
+  /MT
+ link
+  freeglut.lib;freetype271.lib;glew32s.lib;sfml-main.lib;sfml-system.lib;sfml-window.lib;sfml-graphics.lib;SE3D.lib;%(AdditionalDependencies)
+ required
+  freetype271.dll, sfml-graphics-2.dll, sfml-window-2.dll, sfml-audio-2.dll, sfml-system-2.dll, msvcp140.dll, vcruntime140.dll

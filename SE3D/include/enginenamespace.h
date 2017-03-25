@@ -578,6 +578,10 @@ namespace _ENGINESPACE
 	{
 		EngineLayer::instance()->setOrientation(2);
 	}
+	inline void setIcon(const std::string &file)
+	{
+		EngineLayer::instance()->setIcon(file);
+	}
 	inline int getAllObjects()
 	{
 		return EngineLayer::instance()->objectCountAll();

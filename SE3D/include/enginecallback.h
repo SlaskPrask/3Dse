@@ -25,6 +25,7 @@ namespace _engineprivate
 	bool CallbackReadFile(const std::string &f,std::string *s);
 	void CallbackPrintLog(const std::string &s);
 	void CallbackSetTitle(const std::string &s);
+	void CallbackSetIcon(const std::string &s);
 	void CallbackSetOrientation(int orientation);
 	bool CallbackUnsetFullscreen();
 	bool CallbackSetFullscreen();
