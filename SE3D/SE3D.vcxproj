@@ -152,6 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="E:\Oma\Android\Sikal\jni\include\platformaudio.h" />
     <ClInclude Include="include\androidnames.h" />
     <ClInclude Include="include\animation.h" />
     <ClInclude Include="include\animationdata.h" />

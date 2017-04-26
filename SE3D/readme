@@ -13,6 +13,8 @@ debug:
 release:
  runtime library
   /MT
+ subsystem
+  /SUBSYSTEM:WINDOWS
  link
   freeglut.lib;freetype271.lib;glew32s.lib;sfml-main.lib;sfml-system.lib;sfml-window.lib;sfml-graphics.lib;SE3D.lib;%(AdditionalDependencies)
  required

@@ -62,6 +62,16 @@ int EngineLayer::event(int id, int size, int *value)
 			if (instance()->gameFocusGainFunc)
 			instance()->gameFocusGainFunc();
 			return 0;
+		case 12://ad size change
+			{
+				if (value[1]<=0)
+				value[1]=instance()->height<=0?1:instance()->height;
+				double adRatio=(double)value[0]/(double)value[1];
+				if (instance()->state.adSize!=adRatio)
+				instance()->state.adChange=1;
+				instance()->state.adSize=adRatio;
+			}
+			return 0;
 	}
 	return 0;
 }
@@ -76,9 +86,14 @@ std::string EngineLayer::stringEvent(int id, int size, std::string *value)
 		case 0://text keyboard input
 			{
 				instance()->state.keyboardinput="";
-				for(unsigned int i=0;i<value[0].length();i++)
-				if (value[0][i]<256)
-				instance()->state.keyboardinput+=value[0][i];
+				for (unsigned int i=0;i<value[0].length();i++)
+					if (value[0][i]<256)
+						instance()->state.keyboardinput+=value[0][i];
+			}
+			break;
+		case 1://version report
+			{
+				Log::log("Engine",std::string("Platform version ")+value[0]+" "+value[1]+" "+value[2]+" SDK "+value[3]);
 			}
 			break;
 	}
@@ -95,9 +110,11 @@ void EngineLayer::eventParser()
 	focusGained=state.focusGained;
 	focusLost=state.focusLost;
 	keyboardinput=state.keyboardinput;
-	state.backButton=state.windowResized=state.closed=state.paused=state.resumed=state.focusGained=state.focusLost=0;
+	adChange=state.adChange;
+	adSize=state.adSize;
+	state.adChange=state.backButton=state.windowResized=state.closed=state.paused=state.resumed=state.focusGained=state.focusLost=0;
 	state.keyboardinput="";
-
+	
 	if (windowResized)
 	{
 		if (width!=reqWidth||height!=reqHeight)
@@ -341,25 +358,21 @@ void EngineLayer::setJVM(JNIEnv *env)
 #endif
 
 #ifdef ANDROID
-JNIEnv* EngineLayer::getEnv()
+JNIEnv* EngineLayer::getEnv(bool *attached)
 {
-	JNIEnv *env=NULL;
-	JavaVMAttachArgs ar;
-	ar.version=JNI_VERSION_1_6;
-	ar.name=NULL;
-	ar.group=NULL;
-	jint rs=instance()->jvm->AttachCurrentThread(&env,&ar);
-	//int rs=instance()->jvm->GetEnv((void**)&env,JNI_VERSION_1_6);
-	if (rs==JNI_OK)
+	JNIEnv *env;
+	if (instance()->jvm->GetEnv((void **)&env,JNI_VERSION_1_6)==JNI_EDETACHED)
+	{
+		instance()->jvm->AttachCurrentThread(&env,NULL);
+		*attached=1;
+	}
+	else
+	*attached=0;
 	return env;
-	else
-	if (rs==JNI_EVERSION)
-	Log::error("Engine","JNI environment failed to attach");
-	else
-	if (rs==JNI_EVERSION)
-	Log::error("Engine","JNI version environment unavailable");
-	else
-	Log::error("Engine",std::string("JNI environment unavailable: ")+to_string(rs));
-	return env;
+}
+void EngineLayer::giveEnv(bool *attached)
+{
+	if (*attached)
+	instance()->jvm->DetachCurrentThread();
 }
 #endif

@@ -23,6 +23,10 @@ namespace _ENGINESPACE
 	{
 		return a*180.0f/M_PI;
 	}
+	inline double transform(double rat,double val1,double val2)
+	{
+		return val1*(1-rat)+val2*rat;
+	}
 	double lengthdirX(double angle,double x,double y);
 	double lengthdirY(double angle,double x,double y);
 	template <class T,class F,class E>

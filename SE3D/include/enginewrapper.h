@@ -47,7 +47,7 @@ namespace _engine
 		{
 			static int(*mainf)(int,char**)=NULL;
 			if (f!=NULL)
-				mainf=f;
+			mainf=f;
 			return mainf;
 		}
 		MainFunction(int(*f)(int,char**))

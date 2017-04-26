@@ -47,7 +47,7 @@ namespace _ENGINESPACE
 		}
 		
 		public:
-		AnimationData(bool rt=0);
+		AnimationData(bool rt=1);
 		inline void setLoop(bool l=1)
 		{
 			loop=l;

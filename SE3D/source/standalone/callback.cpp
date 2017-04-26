@@ -27,6 +27,16 @@ void _engineprivate::CallbackSetIcon(const std::string &s)
 	window->setIcon(image.getSize().x,image.getSize().y,image.getPixelsPtr());
 }
 
+void _engineprivate::CallbackStartAds(const std::string &adKey,int size,bool top)
+{
+	/*empty, not supported*/
+}
+
+void _engineprivate::CallbackEndAds()
+{
+	/*empty, not supported*/
+}
+
 bool _engineprivate::CallbackExistsFile(const std::string &f)
 {
 	bool ret=0;
@@ -327,43 +337,139 @@ bool _engineprivate::CallbackOpenURL(const std::string &uri)
 
 int _engineprivate::CallbackLoadSound(const std::string &s)
 {
-	//TODO
-	return -1;
+	std::vector<SoundStorage*> *buf=EngineLayer::instance()->getAudioBuffers();
+	unsigned int i=0;
+
+	while(i<buf->size())//find free id
+	{
+		if ((*buf)[i]==NULL)
+		break;
+
+		i++;
+	}
+
+	sf::SoundBuffer *buffer=new sf::SoundBuffer;
+	if (!buffer->loadFromFile(s))
+	{
+		delete buffer;
+		Log::error("Resources",std::string("Unable to load audio file \"")+s+"\"");
+		return -1;
+	}
+
+	SoundStorage *storage=new SoundStorage(buffer,NULL);
+
+	if (i==buf->size())
+	buf->push_back(storage);
+	else
+	(*buf)[i]=storage;
+
+	return i;
 }
 
 void _engineprivate::CallbackUnloadSound(int i)
 {
-	//TODO
+	std::vector<SoundStorage*> *buf=EngineLayer::instance()->getAudioBuffers();
+	delete (*buf)[i];
+	if (i==buf->size()-1)
+	buf->pop_back();
+	else
+	(*buf)[i]=NULL;
 }
 
 int _engineprivate::CallbackPlaySound(int i,float l,float r,int prio,int loops,float speed)
 {
-	return 0;
+	std::vector<SoundInstance*> *snd=EngineLayer::instance()->getSounds();
+	std::vector<SoundStorage*> *buf=EngineLayer::instance()->getAudioBuffers();
+	unsigned int sndpos=0;
+	int lowestprio=INT_MAX;
+	unsigned long long int lowestage=ULLONG_MAX;
+	int lowest=0;
+	while (sndpos<snd->size())//find free id
+	{
+		if ((*snd)[sndpos]==NULL)
+		break;
+		else
+		if (((*snd)[sndpos]->priority<lowestprio)
+		||  ((*snd)[sndpos]->priority==lowestprio&&((*snd)[sndpos]->age<lowestage)))
+		{
+			lowestprio=(*snd)[sndpos]->priority;
+			lowestage=(*snd)[sndpos]->age;
+			lowest=sndpos;
+		}
+		if ((*snd)[sndpos]->sound->getStatus()==sf::SoundSource::Status::Stopped)
+		{
+			delete (*snd)[sndpos];
+			(*snd)[sndpos]=NULL;
+			break;
+		}
+
+		sndpos++;
+	}
+	sf::Sound *sound=new sf::Sound;
+	sound->setBuffer(*((*buf)[i]->buffer));
+	sound->play();
+	sound->setLoop(loops!=0);
+	sound->setPitch(speed);
+
+	if (sndpos==snd->size())
+	{
+		if (snd->size()>=255)
+		{
+			(*snd)[lowest]->sound->stop();
+			delete (*snd)[lowest];
+			(*snd)[lowest]=new SoundInstance(sound,(*buf)[i]->sound,prio,EngineLayer::instance()->getPassedTime());
+		}
+		else
+		snd->push_back(new SoundInstance(sound,(*buf)[i]->sound,prio,EngineLayer::instance()->getPassedTime()));
+	}
+	else
+	(*snd)[sndpos]=new SoundInstance(sound,(*buf)[i]->sound,prio,EngineLayer::instance()->getPassedTime());
+
+	return sndpos;
 }
 
 void _engineprivate::CallbackPauseSound(int i)
 {
-	//TODO
+	std::vector<SoundInstance*> *snd=EngineLayer::instance()->getSounds();
+	(*snd)[i]->sound->pause();
 }
 
 void _engineprivate::CallbackUnpauseSound(int i)
 {
-	//TODO
+	std::vector<SoundInstance*> *snd=EngineLayer::instance()->getSounds();
+	if ((*snd)[i]->sound->getStatus()==sf::SoundSource::Status::Paused)
+	(*snd)[i]->sound->play();
 }
 
 void _engineprivate::CallbackStopSound(int i)
 {
-	//TODO
+	std::vector<SoundInstance*> *snd=EngineLayer::instance()->getSounds();
+	(*snd)[i]->sound->stop();
+	delete (*snd)[i];
+	(*snd)[i]=NULL;
+
+	if (i==snd->size()-1)
+	{
+		while((snd->back())==NULL)
+		snd->pop_back();
+	}
 }
 
 void _engineprivate::CallbackSpeedSound(int i,float spd)
 {
-	//TODO
+	std::vector<SoundInstance*> *snd=EngineLayer::instance()->getSounds();
+	(*snd)[i]->sound->setPitch(spd);
 }
 
 void _engineprivate::CallbackVolumeSound(int i,float left,float right)
 {
-	//TODO
+	std::vector<SoundInstance*> *snd=EngineLayer::instance()->getSounds();
+	float ratio=left>right?left:right;
+	left/=ratio;
+	right/=ratio;
+	float pos=(left+right)/2.0f;
+	sf::Vector3f pan(pos,0,pos<0?-pos-1.0f:pos-1.0f);
+	(*snd)[i]->sound->setVolume(ratio*100.0f);
 }
 
 void _engineprivate::CallbackCloseApplication()

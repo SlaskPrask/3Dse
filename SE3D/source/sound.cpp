@@ -1,17 +1,33 @@
 #include "../include/sound.h"
+#include "../include/enginelayer.h"
 
 using namespace _engineprivate;
 using namespace _ENGINESPACE;
 
-inline void Sound::load(const std::string &file,volatile bool threaded)
+void Sound::init()
+{
+	loaded=0;
+	playId=0;
+	loadedId=0;
+}
+
+void Sound::load(const std::string &file,volatile bool threaded)
 {
 	if (loaded)
 	unload();
 	
 	loadedId=CallbackLoadSound(file);
-	loaded=1;
-	playId=0;
-	looping=0;
+	if (loadedId!=-1)
+	{
+		loaded=1;
+		playId=0;
+		looping=0;
+		#ifndef ANDROID
+		EngineLayer::instance()->assignSoundToBuffer(loadedId,this);
+		#endif
+	}
+	else
+	loadedId=0;
 }
 void Sound::unload()
 {
@@ -34,6 +50,7 @@ void Sound::stop()
 
 Sound::Sound(const std::string &file,volatile bool threaded)
 {
+	init();
 	load(file,threaded);
 }
 
@@ -48,9 +65,7 @@ int Sound::play(double l,double r,int prio,bool loop,double speed)
 
 Sound::Sound()
 {
-	loaded=0;
-	playId=0;
-	loadedId=0;
+	init();
 }
 
 Sound::~Sound()

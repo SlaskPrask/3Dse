@@ -30,6 +30,7 @@ void Log::enable()
 		enabled=1;
 		for (std::vector<std::string>::iterator it=buffer.begin();it!=buffer.end();++it)
 		instance()->forcePush(*it);
+		buffer.clear();
 	}
 }
 

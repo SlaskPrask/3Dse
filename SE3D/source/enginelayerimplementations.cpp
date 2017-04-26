@@ -211,10 +211,13 @@ EngineLayer::EngineLayer()
 	backButton=0;
 	windowResized=0;
 	focusGained=focusLost=0;
+	adChange=0;
+	adSize=0;
 	resumed=paused=0;
 	focus=1;
 	keyboardinput="";
 	srand((unsigned int)time(NULL));
+	passedTime=0;
 
 	key=new int[MAX_KEYBOARD_KEYS];
 	keyboardstr="";
@@ -917,7 +920,12 @@ void EngineLayer::printGLErrors(std::string pos)
 	#else
 	GLenum result=glGetError();
 	if (result!=GL_NO_ERROR)
+	#ifdef ANDROID
+	//todo ERRORSTR
+	Log::error("Graphics",pos+to_string(result));
+	#else
 	Log::error("Graphics",pos+(const char*)gluErrorString(result));
+	#endif
 	#endif
 }
 
@@ -967,6 +975,16 @@ double EngineLayer::getScreenRatio()
 {
 	//if (blackbars)
 	return dominantRatio?widthRatio:heightRatio;
+}
+
+double EngineLayer::getAdHeight()
+{
+	return adSize*getCameraH();
+}
+
+double EngineLayer::getAdWindowHeight()
+{
+	return adSize*getHeight();
 }
 
 void EngineLayer::setColorization(double r,double g,double b)
@@ -1567,6 +1585,20 @@ EngineLayer::~EngineLayer()
 	#endif
 	delete defaultCamera;
 
+	#ifndef ANDROID
+	DEBUGFUNC(Log::log("Audio","Closing audio"));
+	for (std::vector<SoundInstance*>::iterator it=audioSound.begin();it!=audioSound.end();++it)
+	{
+		if (*it!=NULL)
+		delete (*it);
+	}
+	for (std::vector<SoundStorage*>::iterator it=audioBuffer.begin();it!=audioBuffer.end();++it)
+	{
+		if (*it!=NULL)
+		delete (*it);
+	}
+	#endif
+
 	delete[] key;
 	Log::log("Engine","Finished");
 }
@@ -1739,6 +1771,90 @@ void EngineLayer::debugToggleTouchables()
 {
 	debugShowTouchables=!debugShowTouchables;
 }
+void EngineLayer::dumpResources()
+{
+	std::ostringstream s;
+	s << "RESOURCE SETS: " << resourcesets.size();
+	Log::log("Debug",s.str().c_str());
+	int set=0;
+	for (std::vector<ResourceSet*>::iterator it=resourcesets.begin();it!=resourcesets.end();++it)
+	{
+		s.str("");
+		if ((*it)->loads==0)
+		s << "SET: " << set << " unloaded";
+		else
+		s << "SET: " << set << " loaded " << (*it)->loads << ((*it)->loads==1?" time":" times");
+		Log::log("Debug",s.str().c_str());
+
+		for (unsigned int i=0;i<(*it)->getSprites();i++)
+		{
+			s.str("");
+			s << "Sprite " << i << " (" << resourceSet(set)->getSprite(i) << ") " << "\"" << resourceSet(set)->getSpriteResource(i)->getFile() << "\"";
+			Log::log("Debug",s.str().c_str());
+		}
+
+		for (unsigned int i=0;i<(*it)->getSounds();i++)
+		{
+			s.str("");
+			s << "Sound " << i << " (" << resourceSet(set)->getSound(i) << ") "  << "\"" << resourceSet(set)->getSoundResource(i)->getFile() << "\"";
+			Log::log("Debug",s.str().c_str());
+		}
+
+		for (unsigned int i=0;i<(*it)->getFonts();i++)
+		{
+			s.str("");
+			s << "Font " << i << " (" << resourceSet(set)->getFont(i) << ") "  << "\"" << resourceSet(set)->getFontResource(i)->getFile() << "\"";
+			Log::log("Debug",s.str().c_str());
+		}
+
+		set++;
+	}
+
+	Log::log("Debug","");
+}
+void EngineLayer::dumpLoadedSounds()
+{
+	#ifndef ANDROID
+	std::ostringstream s;
+	s << "LOADED SOUNDS";
+	Log::log("Debug",s.str().c_str());
+
+	int i=0;
+	for (std::vector<SoundStorage*>::iterator it=audioBuffer.begin();it!=audioBuffer.end();++it)
+	{
+		s.str("");
+		s << i << ": " << (*it)->sound;
+		Log::log("Debug",s.str().c_str());
+
+		i++;
+	}
+
+	Log::log("Debug","");
+	#endif
+}
+void EngineLayer::dumpPlayingSounds()
+{
+	#ifndef ANDROID
+	std::ostringstream s;
+	s << "PLAYING SOUNDS";
+	Log::log("Debug",s.str().c_str());
+
+	int i=0;
+	for (std::vector<SoundInstance*>::iterator it=audioSound.begin();it!=audioSound.end();++it)
+	{
+		s.str("");
+		if (*it&&(*it)->sound->getStatus()!=sf::SoundSource::Status::Stopped)
+		s << i << ": " << (*it)->soundres << " priority: " << (*it)->priority << " age: " << (*it)->age << ((*it)->sound->getStatus()==sf::SoundSource::Status::Paused?" paused":"");
+		else
+		s << i << ": " << (void*)NULL;
+		Log::log("Debug",s.str().c_str());
+
+		i++;
+	}
+
+	Log::log("Debug","");
+	#endif
+}
 void EngineLayer::debugHandler()
 {
 	#ifndef ANDROID
@@ -1792,6 +1908,13 @@ void EngineLayer::debugHandler()
 		dumpDepthChangeQueue();
 		if (getKeyPress(sf::Keyboard::Key::F11))
 		dumpDepthQueue();
+
+		if (getKeyPress(sf::Keyboard::Key::F5))
+		dumpResources();
+		if (getKeyPress(sf::Keyboard::Key::F6))
+		dumpLoadedSounds();
+		if (getKeyPress(sf::Keyboard::Key::F7))
+		dumpPlayingSounds();
 	}
 	#endif
 }

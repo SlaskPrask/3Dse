@@ -18,6 +18,7 @@
 #include <freetype/fttrigon.h>
 #endif
 #include "platformgraphics.h"
+#include "platformaudio.h"
 #include "enginesettings.h"
 #include "log.h"
 #include "sprite.h"
@@ -37,6 +38,8 @@
 #include "hitbox.h"
 #include "collisionobject.h"
 #include "loader.h"
+#include "animation.h"
+#include "animationdata.h"
 
 #ifdef ANDROID
 #define _MAX_MOUSES (10)
@@ -50,7 +53,7 @@
 #define _DEFAULT_TITLE "Game"
 
 //release num,dev stage,patch,[0=alpha 1=beta 2=candidate 3=release]
-#define ENGINEVERSION "1.1.0.0"
+#define ENGINEVERSION "1.3.1.2"
 
 namespace _engineprivate
 {
@@ -78,12 +81,15 @@ namespace _engineprivate
 		bool resumed;
 		bool focusGained;
 		bool focusLost;
+		bool adChange;
+		double adSize;
 		std::string keyboardinput;
 		std::vector<MouseEvent> mouseEvents;
 		LayerState()
 		{
-			backButton=windowResized=closed=paused=resumed=focusGained=focusLost=0;
+			adChange=backButton=windowResized=closed=paused=resumed=focusGained=focusLost=0;
 			keyboardinput="";
+			adSize=0;
 		}
 	};
 
@@ -116,8 +122,12 @@ namespace _engineprivate
 		bool closed;
 		bool paused,resumed;
 		bool focusGained,focusLost;
+		bool adChange;
+		double adSize;
 		std::string keyboardinput;
 		bool forcedRelease;
+
+		unsigned long long int passedTime;
 		
 		int mouseX[_MAX_MOUSES],mouseY[_MAX_MOUSES],mouseState[_MAX_MOUSES][_MAX_MOUSE_BUTTONS];
 		double mouseTX[_MAX_MOUSES],mouseTY[_MAX_MOUSES];
@@ -225,7 +235,8 @@ namespace _engineprivate
 
 		#ifdef ANDROID
 		static void setJVM(JNIEnv *env);
-		static JNIEnv* getEnv();
+		static JNIEnv* getEnv(bool *attached);
+		static void giveEnv(bool *attached);
 		jclass JNIAssetManager,JNIEngineLayer;
 		inline jclass* getAssetManager()
 		{
@@ -240,6 +251,12 @@ namespace _engineprivate
 		static std::string stringEvent(int id, int size, std::string *value);
 		static void message(const std::string &m);
 		void eventParser();
+
+		//audio
+		#ifndef ANDROID
+		std::vector<SoundStorage*> audioBuffer;
+		std::vector<SoundInstance*> audioSound;
+		#endif
 		
 		//engine
 		static const bool mobile;
@@ -493,6 +510,20 @@ namespace _engineprivate
 		}
 		
 		//audio
+		#ifndef ANDROID
+		void assignSoundToBuffer(unsigned int loadedId,void *sound)
+		{
+			audioBuffer[loadedId]->sound=sound;
+		}
+		std::vector<SoundStorage*> *getAudioBuffers()
+		{
+			return &audioBuffer;
+		}
+		std::vector<SoundInstance*> *getSounds()
+		{
+			return &audioSound;
+		}
+		#endif
 		inline int sndPlay(Sound *sound,double l,double r,int prio,bool loop,double speed)
 		{
 			return sound->play(l,r,prio,loop,speed);
@@ -639,6 +670,10 @@ namespace _engineprivate
 		{
 			return maxFrameTime;
 		}
+		inline unsigned long long int getPassedTime()
+		{
+			return passedTime;
+		}
 		inline void setBackgroundColor(double fr,double fg,double fb)
 		{
 			r=(GLfloat)fr;
@@ -730,12 +765,12 @@ namespace _engineprivate
 		template<class T>
 		inline unsigned int getObjectId()
 		{
-			return *T::_objectId();
+			return *(T::_objectId());
 		}
 		template<class T>
 		inline unsigned int getSceneId()
 		{
-			return *T::_sceneId();
+			return *(T::_sceneId());
 		}
 		template<class T>
 		inline int objectCount()
@@ -798,6 +833,14 @@ namespace _engineprivate
 		{
 			return CallbackOpenURL(uri);
 		}
+		void startAds(const std::string &adKey,int size,bool ontop)
+		{
+			CallbackStartAds(adKey,size,ontop);
+		}
+		void endAds()
+		{
+			CallbackEndAds();
+		}
 		inline bool fileExists(const std::string &file)
 		{
 			return CallbackExistsFile(workingDirectory(file));
@@ -814,6 +857,8 @@ namespace _engineprivate
 		{
 			return CallbackReadFile(workingDirectory(file),text);
 		}
+		double getAdHeight();
+		double getAdWindowHeight();
 		double getScreenRatio();
 		inline void addTouchable(Touchable *t)
 		{
@@ -843,6 +888,9 @@ namespace _engineprivate
 		void dumpDepths();
 		void dumpDepthQueue();
 		void dumpDepthChangeQueue();
+		void dumpResources();
+		void dumpPlayingSounds();
+		void dumpLoadedSounds();
 		void dumpObj(Object *obj);
 		void debugToggleCollision();
 		void debugToggleTouchables();

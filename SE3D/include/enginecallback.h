@@ -19,6 +19,8 @@ namespace _engineprivate
 	void EngineLayerSetupJNI(JNIEnv* env, jobject obj);
 	#endif
 
+	void CallbackStartAds(const std::string &adKey,int size,bool top);
+	void CallbackEndAds();
 	bool CallbackDeleteFile(const std::string &f);
 	bool CallbackExistsFile(const std::string &f);
 	bool CallbackWriteFile(const std::string &f,const std::string &s);

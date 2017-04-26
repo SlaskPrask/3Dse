@@ -14,6 +14,8 @@ void EngineLayer::run(double delta)
 			int (*mainf)(int,char**)=_engine::MainFunction::mainFunction();
 			mainf(0,NULL);
 		}
+		else
+		Log::error("Engine","Main entry function \"int main(int,char**)\" missing.");
 		init=0;
 		return;
 	}
@@ -28,7 +30,6 @@ void EngineLayer::run(double delta)
 	#else
 
 	sf::Clock frameClock;
-	unsigned long int passedTime;
 
 	while (running)
 	{
@@ -39,12 +40,12 @@ void EngineLayer::run(double delta)
 			coreStart();
 		}
 		else
-		passedTime=(unsigned long int)frameClock.getElapsedTime().asMicroseconds();
+		passedTime=(unsigned long long int)frameClock.getElapsedTime().asMicroseconds();
 
 		if (fps>0)
 		{
 			sf::sleep(sf::microseconds((sf::Int64)(1000000.0f/fps-passedTime)));
-			passedTime=(unsigned long int)frameClock.getElapsedTime().asMicroseconds();
+			passedTime=(unsigned long long int)frameClock.getElapsedTime().asMicroseconds();
 		}
 		frameClock.restart();
 	
@@ -115,7 +116,7 @@ void EngineLayer::coreRun(double delta)
 	}
 
 	//resize
-	if (windowResized||backButton)
+	if (windowResized||adChange)
 	{
 		if (gameWindowResizeFunc)
 		gameWindowResizeFunc();
@@ -142,7 +143,7 @@ void EngineLayer::coreRun(double delta)
 		handleObj=(Object*)objI;
 		handleObjDeleted=0;
 		nextObjI=objI->getNext();
-		if (!switchingScenes&&handleObj->isRunEnabled())
+		if (!switchingScenes&&!handleObj->_destroyed&&handleObj->isRunEnabled())
 		handleObj->run();
 
 		if (!handleObjDeleted&&handleObj->_getDestroyed())

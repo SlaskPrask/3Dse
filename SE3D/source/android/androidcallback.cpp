@@ -1,7 +1,7 @@
 #include "../../include/enginelayer.h"
 #include "../../include/enginecallback.h"
 #include "../../include/androidnames.h"
-
+	
 jint _engineprivate::EngineLayerEvent(JNIEnv *env,jobject obj, jint id, jintArray arg)
 {
 	if (arg==0)
@@ -32,7 +32,7 @@ jstring _engineprivate::EngineLayerStringEvent(JNIEnv *env,jobject obj, jint id,
 	jsize size=env->GetArrayLength(arg);
 	std::string *value=new std::string[size];
 	for(int i=0;i<size;i++)
-	value[i]=(const char*)env->GetStringChars((jstring)env->GetObjectArrayElement(arg,i),0);
+	value[i]=(const char*)env->GetStringUTFChars((jstring)env->GetObjectArrayElement(arg,i),0);
 
 	result=env->NewStringUTF(_engineprivate::EngineLayer::stringEvent(id,size,value).c_str());
 
@@ -45,9 +45,36 @@ void _engineprivate::EngineLayerSetupJNI(JNIEnv* env, jobject obj)
 	_engineprivate::EngineLayer::setJVM(env);
 }
 
+void _engineprivate::CallbackStartAds(const std::string &adKey,int size,bool top)
+{
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
+	jstring str=e->NewStringUTF(adKey.c_str());
+	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
+	
+	jmethodID m=e->GetStaticMethodID(c,"startAds","(IILjava/lang/String;)V");
+	e->CallStaticVoidMethod(c,m,size,(int)top?1:0,str);
+	e->DeleteLocalRef(str);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
+}
+
+void _engineprivate::CallbackEndAds()
+{
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
+	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
+	
+	jmethodID m=e->GetStaticMethodID(c,"endAds","()V");
+	e->CallStaticVoidMethod(c,m);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
+}
+
 bool _engineprivate::CallbackExistsFile(const std::string &f)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jstring str=e->NewStringUTF(f.c_str());
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 
@@ -55,12 +82,14 @@ bool _engineprivate::CallbackExistsFile(const std::string &f)
 	int res=e->CallStaticIntMethod(c,m,str);
 	e->DeleteLocalRef(str);
 
+	_engineprivate::EngineLayer::giveEnv(&attached);
 	return res;
 }
 
 bool _engineprivate::CallbackDeleteFile(const std::string &f)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jstring str=e->NewStringUTF(f.c_str());
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 
@@ -68,12 +97,14 @@ bool _engineprivate::CallbackDeleteFile(const std::string &f)
 	int res=e->CallStaticIntMethod(c,m,str);
 	e->DeleteLocalRef(str);
 
+	_engineprivate::EngineLayer::giveEnv(&attached);
 	return res;
 }
 
 bool _engineprivate::CallbackWriteFile(const std::string &f,const std::string &s)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jstring str=e->NewStringUTF(f.c_str());
 	jbyteArray text=e->NewByteArray(s.length());
 	const char *cstr=s.c_str();
@@ -85,12 +116,14 @@ bool _engineprivate::CallbackWriteFile(const std::string &f,const std::string &s
 	e->DeleteLocalRef(str);
 	e->DeleteLocalRef(text);
 
+	_engineprivate::EngineLayer::giveEnv(&attached);
 	return res;
 }
 
 bool _engineprivate::CallbackReadFile(const std::string &f,std::string *s)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jstring str=e->NewStringUTF(f.c_str());
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 
@@ -107,7 +140,7 @@ bool _engineprivate::CallbackReadFile(const std::string &f,std::string *s)
 	if (res)
 	{
 		jbyte *chr=e->GetByteArrayElements(text,NULL);
-		for(int i=0;i<result[1];i++)
+		for(int i=0;i<length;i++)
 		*s+=(char)chr[i];
 		e->ReleaseByteArrayElements(text,chr,0);
 	}
@@ -116,40 +149,48 @@ bool _engineprivate::CallbackReadFile(const std::string &f,std::string *s)
 	e->DeleteLocalRef(text);
 	e->DeleteLocalRef(str);
 
+	_engineprivate::EngineLayer::giveEnv(&attached);
 	return res;
 }
 
 bool _engineprivate::CallbackUnsetFullscreen()
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 
 	jmethodID m=e->GetStaticMethodID(c,"unsetFullscreen","()I");
 	jint set=e->CallStaticIntMethod(c,m);
 
+	_engineprivate::EngineLayer::giveEnv(&attached);
 	return (set!=0);
 }
 
 bool _engineprivate::CallbackSetFullscreen()
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 
 	jmethodID m=e->GetStaticMethodID(c,"setFullscreen","()I");
 	jint set=e->CallStaticIntMethod(c,m);
 
+	_engineprivate::EngineLayer::giveEnv(&attached);
 	return (set!=0);
 }
 
 void _engineprivate::CallbackSetTitle(const std::string &s)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jstring str=e->NewStringUTF(s.c_str());
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 
 	jmethodID m=e->GetStaticMethodID(c,"setTitle","(Ljava/lang/String;)V");
 	e->CallStaticVoidMethod(c,m,str);
 	e->DeleteLocalRef(str);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 }
 
 void _engineprivate::CallbackSetIcon(const std::string &s)
@@ -159,27 +200,34 @@ void _engineprivate::CallbackSetIcon(const std::string &s)
 
 void _engineprivate::CallbackPrintLog(const std::string &s)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jstring str=e->NewStringUTF(s.c_str());
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 
 	jmethodID m=e->GetStaticMethodID(c,"log","(Ljava/lang/String;)V");
 	e->CallStaticVoidMethod(c,m,str);
 	e->DeleteLocalRef(str);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 }
 
 void _engineprivate::CallbackSetOrientation(int orientation)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 
 	jmethodID m=e->GetStaticMethodID(c,"setOrientation","(I)V");
 	e->CallStaticVoidMethod(c,m,orientation);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 }
 
 GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *height,bool threaded,GLuint *destination)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jstring str=e->NewStringUTF(s.c_str());
 	jclass c=*_engineprivate::EngineLayer::instance()->getAssetManager();
 	
@@ -226,20 +274,25 @@ GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *heig
 
 		_engine::generateTexture(&tex,*width,*height,data,GL_RGBA);
 
+		_engineprivate::EngineLayer::giveEnv(&attached);
 		delete[] data;
 		return tex;
 	}
 	else
 	{
 		_engineprivate::EngineLayer::pushLoaderData(destination,*width,*height,data,GL_RGBA);
+
+		_engineprivate::EngineLayer::giveEnv(&attached);
 		return 1;//temp value
 	}
+	_engineprivate::EngineLayer::giveEnv(&attached);
 	return 0;
 }
 
 GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,int startc,int camount,int totalchars,bool threaded,GLuint *destination)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jstring str=e->NewStringUTF(s.c_str());
 	jclass c=*_engineprivate::EngineLayer::instance()->getAssetManager();
 
@@ -308,138 +361,182 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 
 		_engine::generateTexture(&tex,texsizew,texsizeh,data,GL_RGBA);
 
+		_engineprivate::EngineLayer::giveEnv(&attached);
 		delete[] data;
 		return tex;
 	}
 	else
 	{
 		_engineprivate::EngineLayer::pushLoaderData(destination,texsizew,texsizeh,data,GL_RGBA);
+
+		_engineprivate::EngineLayer::giveEnv(&attached);
 		return 1;//temp value
 	}
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 	return 0;
 }
 
 void _engineprivate::CallbackMessage(const std::string &s)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jstring str=e->NewStringUTF(s.c_str());
 	
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 	jmethodID m=e->GetStaticMethodID(c,"message","(Ljava/lang/String;)V");
 	e->CallStaticVoidMethod(c,m,str);
 	e->DeleteLocalRef(str);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 }
 
 void _engineprivate::CallbackRequestInput(int type)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 	
 	jmethodID m=e->GetStaticMethodID(c,"requestInput","(I)V");
 	e->CallStaticVoidMethod(c,m,type);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 }
 
 void _engineprivate::CallbackSetFPS(int fps)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 	
 	jmethodID m=e->GetStaticMethodID(c,"setFPS","(I)V");
 	e->CallStaticVoidMethod(c,m,fps);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 }
 
 bool _engineprivate::CallbackOpenURL(const std::string &uri)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jstring str=e->NewStringUTF(uri.c_str());
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 
 	jmethodID m=e->GetStaticMethodID(c,"openURL","(Ljava/lang/String;)I");
 	int i=e->CallStaticIntMethod(c,m,str);
 	e->DeleteLocalRef(str);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 	return i!=0;
 }
 
 int _engineprivate::CallbackLoadSound(const std::string &s)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jstring str=e->NewStringUTF(s.c_str());
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 	
 	jmethodID m=e->GetStaticMethodID(c,"sndLoad","(Ljava/lang/String;)I");
 	int snd=e->CallStaticIntMethod(c,m,str);
 	e->DeleteLocalRef(str);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 	return snd;
 }
 
 void _engineprivate::CallbackUnloadSound(int i)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 	
 	jmethodID m=e->GetStaticMethodID(c,"sndUnload","(I)V");
 	e->CallStaticVoidMethod(c,m,i);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 }
 
 int _engineprivate::CallbackPlaySound(int i,float l,float r,int prio,int loops,float speed)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 	
 	jmethodID m=e->GetStaticMethodID(c,"sndPlay","(IFFIIF)I");
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 	return e->CallStaticIntMethod(c,m,i,l,r,prio,loops,speed);
 }
 
 void _engineprivate::CallbackPauseSound(int i)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 	
 	jmethodID m=e->GetStaticMethodID(c,"sndPause","(I)V");
 	e->CallStaticVoidMethod(c,m,i);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 }
 
 void _engineprivate::CallbackUnpauseSound(int i)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 	
 	jmethodID m=e->GetStaticMethodID(c,"sndUnpause","(I)V");
 	e->CallStaticVoidMethod(c,m,i);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 }
 
 void _engineprivate::CallbackStopSound(int i)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 	
 	jmethodID m=e->GetStaticMethodID(c,"sndStop","(I)V");
 	e->CallStaticVoidMethod(c,m,i);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 }
 
 void _engineprivate::CallbackSpeedSound(int i,float spd)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 	
 	jmethodID m=e->GetStaticMethodID(c,"sndSpeed","(IF)V");
 	e->CallStaticVoidMethod(c,m,i,spd);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 }
 
 void _engineprivate::CallbackVolumeSound(int i,float left,float right)
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 	
 	jmethodID m=e->GetStaticMethodID(c,"sndVolume","(IFF)V");
 	e->CallStaticVoidMethod(c,m,i,left,right);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 }
 
 void _engineprivate::CallbackCloseApplication()
 {
-	JNIEnv *e=_engineprivate::EngineLayer::getEnv();
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 	
 	jmethodID m=e->GetStaticMethodID(c,"closeApplication","()V");
 	e->CallStaticVoidMethod(c,m);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 }

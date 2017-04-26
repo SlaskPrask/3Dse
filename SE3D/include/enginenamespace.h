@@ -22,6 +22,30 @@ namespace _ENGINESPACE
 	{
 		return run(0,NULL,func);
 	}
+	inline void setAdsFlexible(const std::string &adKey,bool onTop=1)
+	{
+		EngineLayer::instance()->startAds(adKey,3,onTop);
+	}
+	inline void setAdsLarge(const std::string &adKey,bool onTop=1)
+	{
+		EngineLayer::instance()->startAds(adKey,2,onTop);
+	}
+	inline void setAdsMedium(const std::string &adKey,bool onTop=1)
+	{
+		EngineLayer::instance()->startAds(adKey,1,onTop);
+	}
+	inline void setAdsSmall(const std::string &adKey,bool onTop=1)
+	{
+		EngineLayer::instance()->startAds(adKey,0,onTop);
+	}
+	inline void setAds(const std::string &adKey,bool onTop=1)
+	{
+		setAdsSmall(adKey,onTop);
+	}
+	inline void unsetAds()
+	{
+		EngineLayer::instance()->endAds();
+	}
 	inline bool fileExists(const std::string &file)
 	{
 		return EngineLayer::instance()->fileExists(file);
@@ -86,6 +110,14 @@ namespace _ENGINESPACE
 	inline void setResourceDirectory(const std::string &str)
 	{
 		EngineLayer::instance()->setResourceDirectory(str);
+	}
+	inline double getAdHeight()
+	{
+		return EngineLayer::instance()->getAdHeight();
+	}
+	inline double getAdWindowHeight()
+	{
+		return EngineLayer::instance()->getAdWindowHeight();
 	}
 	inline Scene* getScene()
 	{
@@ -541,6 +573,16 @@ namespace _ENGINESPACE
 	inline void destroyAllObjects()
 	{
 		EngineLayer::instance()->deleteAllObjects();
+	}
+	template<class T>
+	void destroyAll()
+	{
+		T *t=getInstance<T>();
+		while (t)
+		{
+			t->destroy();
+			t=getInstance<T>();
+		}
 	}
 	inline void exitGame()
 	{

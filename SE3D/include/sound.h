@@ -17,6 +17,7 @@ namespace _ENGINESPACE
 		friend class _engineprivate::EngineLayer;
 		
 		private:
+		void init();
 		int loadedId;
 		int playId;
 		bool loaded;

@@ -38,6 +38,10 @@ namespace _engineprivate
 		void setSound(const std::string &s);
 		void setFont(const std::string &s,int sz=_FONT_DEFAULT_SIZE,unsigned int chars=_FONT_SET_CHARACTERS);
 		void setEmpty();
+		inline std::string getFile()
+		{
+			return file;
+		}
 		inline Sprite* getSprite()
 		{
 			return static_cast<Sprite*>(data);

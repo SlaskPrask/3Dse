@@ -26,6 +26,18 @@ namespace _ENGINESPACE
 		unsigned int engine_id;
 		void _unload(bool forced=0);
 		bool _deathMark;
+		inline Resource* getSpriteResource(unsigned int i)
+		{
+			return sprites[i];
+		}
+		inline Resource* getSoundResource(unsigned int i)
+		{
+			return sounds[i];
+		}
+		inline Resource* getFontResource(unsigned int i)
+		{
+			return fonts[i];
+		}
 		
 		public:
 		ResourceSet();

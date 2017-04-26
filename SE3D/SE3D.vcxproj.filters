@@ -123,6 +123,9 @@
     <ClInclude Include="include\loader.h">
       <Filter>Header Files\Back</Filter>
     </ClInclude>
+    <ClInclude Include="E:\Oma\Android\Sikal\jni\include\platformaudio.h">
+      <Filter>Header Files\Back</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\camera.cpp">

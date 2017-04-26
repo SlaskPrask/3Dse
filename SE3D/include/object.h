@@ -249,7 +249,9 @@ namespace _ENGINESPACE
 		}
 		inline void destroy()
 		{
+			bool d=_destroyed;
 			_destroyed=1;
+			if (!d)
 			onDestroy();
 		}
 		int addCollisionBox(double px,double py,double w,double h);
