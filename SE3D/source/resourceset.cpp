@@ -38,12 +38,17 @@ Resource* ResourceSet::addSprite(const std::string &s)
 	return r;
 }
 
-Resource* ResourceSet::addSound(const std::string &s)
+Resource* ResourceSet::addSound(const std::string &s,bool stream)
 {
 	Resource *r=new Resource();
-	r->setSound(s);
+	r->setSound(s,stream);
 	sounds.push_back(r);
 	return r;
+}
+
+Resource* ResourceSet::addMusic(const std::string &s)
+{
+	return addSound(s,1);
 }
 
 Resource* ResourceSet::addFont(const std::string &s,int sz,unsigned int characters)

@@ -150,7 +150,15 @@ GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *heig
 	}
 	else
 	{
+		LOADERLOG(Log::log("Loader",std::string("7-Creating data for ")
+						   +to_string(destination)+" "
+						   +to_string(*width)+"x"
+						   +to_string(*height)+" from "
+						   +to_string((void*)data)+" of type "
+						   +to_string(GL_RGBA)
+						   ));
 		EngineLayer::pushLoaderData(destination,*width,*height,data,GL_RGBA);
+		LOADERLOG(Log::log("Loader",std::string("7-Data created")));
 		return 1;//temp value
 	}
 	return 0;
@@ -308,7 +316,15 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	}
 	else
 	{
+		LOADERLOG(Log::log("Loader",std::string("7-Creating font data for ")
+						   +to_string(destination)+" "
+						   +to_string(texsizew)+"x"
+						   +to_string(texsizeh)+" from "
+						   +to_string((void*)data)+" of type "
+						   +to_string(GL_LUMINANCE_ALPHA)
+						   ));
 		EngineLayer::pushLoaderData(destination,texsizew,texsizeh,data,GL_LUMINANCE_ALPHA);
+		LOADERLOG(Log::log("Loader",std::string("7-Data created")));
 		return 1;//temp value
 	}
 	return 0;
@@ -335,7 +351,7 @@ bool _engineprivate::CallbackOpenURL(const std::string &uri)
 	return 0;
 }
 
-int _engineprivate::CallbackLoadSound(const std::string &s)
+int _engineprivate::CallbackLoadSound(const std::string &s,bool stream)
 {
 	std::vector<SoundStorage*> *buf=EngineLayer::instance()->getAudioBuffers();
 	unsigned int i=0;
@@ -348,15 +364,24 @@ int _engineprivate::CallbackLoadSound(const std::string &s)
 		i++;
 	}
 
-	sf::SoundBuffer *buffer=new sf::SoundBuffer;
-	if (!buffer->loadFromFile(s))
-	{
-		delete buffer;
-		Log::error("Resources",std::string("Unable to load audio file \"")+s+"\"");
-		return -1;
-	}
+	SoundStorage *storage;
 
-	SoundStorage *storage=new SoundStorage(buffer,NULL);
+	if (stream)
+	{
+		storage=new SoundStorage(NULL,NULL);
+	}
+	else
+	{
+		sf::SoundBuffer *buffer=new sf::SoundBuffer;
+		if (!buffer->loadFromFile(s))
+		{
+			delete buffer;
+			Log::error("Resources",std::string("Unable to load audio file \"")+s+"\"");
+			return -1;
+		}
+
+		storage=new SoundStorage(buffer,NULL);
+	}
 
 	if (i==buf->size())
 	buf->push_back(storage);
@@ -384,6 +409,14 @@ int _engineprivate::CallbackPlaySound(int i,float l,float r,int prio,int loops,f
 	int lowestprio=INT_MAX;
 	unsigned long long int lowestage=ULLONG_MAX;
 	int lowest=0;
+
+	//vol
+	float ratio=l>r?l:r;
+	l/=ratio;
+	r/=ratio;
+	float pos=(l+r)/2.0f;
+	sf::Vector3f pan(pos,0,pos<0?-pos-1.0f:pos-1.0f);
+
 	while (sndpos<snd->size())//find free id
 	{
 		if ((*snd)[sndpos]==NULL)
@@ -396,7 +429,8 @@ int _engineprivate::CallbackPlaySound(int i,float l,float r,int prio,int loops,f
 			lowestage=(*snd)[sndpos]->age;
 			lowest=sndpos;
 		}
-		if ((*snd)[sndpos]->sound->getStatus()==sf::SoundSource::Status::Stopped)
+		if (((*snd)[sndpos]->sound&&(*snd)[sndpos]->sound->getStatus()==sf::SoundSource::Status::Stopped)
+		||	((*snd)[sndpos]->music&&(*snd)[sndpos]->music->getStatus()==sf::SoundSource::Status::Stopped))
 		{
 			delete (*snd)[sndpos];
 			(*snd)[sndpos]=NULL;
@@ -405,25 +439,66 @@ int _engineprivate::CallbackPlaySound(int i,float l,float r,int prio,int loops,f
 
 		sndpos++;
 	}
-	sf::Sound *sound=new sf::Sound;
-	sound->setBuffer(*((*buf)[i]->buffer));
-	sound->play();
-	sound->setLoop(loops!=0);
-	sound->setPitch(speed);
 
-	if (sndpos==snd->size())
+	sf::Sound *sound=NULL;
+	sf::Music *music=NULL;
+	if (((Sound*)((*buf)[i]->sound))->isStreamed())
 	{
-		if (snd->size()>=255)
+		music=new sf::Music;
+		if (!music->openFromFile(((Sound*)((*buf)[i]->sound))->getFile()))
 		{
-			(*snd)[lowest]->sound->stop();
-			delete (*snd)[lowest];
-			(*snd)[lowest]=new SoundInstance(sound,(*buf)[i]->sound,prio,EngineLayer::instance()->getPassedTime());
+			Log::error("Resources",std::string("Unable to stream audio file \"")+((Sound*)((*buf)[i]->sound))->getFile()+"\"");
 		}
 		else
-		snd->push_back(new SoundInstance(sound,(*buf)[i]->sound,prio,EngineLayer::instance()->getPassedTime()));
+		{
+			music->play();
+			music->setLoop(loops!=0);
+			music->setPitch(speed);
+			music->setVolume(ratio*100.0f);
+			if (sndpos==snd->size())
+			{
+				if (snd->size()>=255)
+				{
+					if ((*snd)[lowest]->sound)
+					(*snd)[lowest]->sound->stop();
+					if ((*snd)[lowest]->music)
+					(*snd)[lowest]->music->stop();
+					delete (*snd)[lowest];
+					(*snd)[lowest]=new SoundInstance(music,(*buf)[i]->sound,prio,EngineLayer::instance()->getPassedTime());
+				}
+				else
+				snd->push_back(new SoundInstance(music,(*buf)[i]->sound,prio,EngineLayer::instance()->getPassedTime()));
+			}
+			else
+			(*snd)[sndpos]=new SoundInstance(music,(*buf)[i]->sound,prio,EngineLayer::instance()->getPassedTime());
+		}
 	}
 	else
-	(*snd)[sndpos]=new SoundInstance(sound,(*buf)[i]->sound,prio,EngineLayer::instance()->getPassedTime());
+	{
+		sound=new sf::Sound;
+		sound->setBuffer(*((*buf)[i]->buffer));
+		sound->play();
+		sound->setLoop(loops!=0);
+		sound->setPitch(speed);
+		sound->setVolume(ratio*100.0f);
+
+		if (sndpos==snd->size())
+		{
+			if (snd->size()>=255)
+			{
+				if ((*snd)[lowest]->sound)
+				(*snd)[lowest]->sound->stop();
+				if ((*snd)[lowest]->music)
+				(*snd)[lowest]->music->stop();
+				delete (*snd)[lowest];
+				(*snd)[lowest]=new SoundInstance(sound,(*buf)[i]->sound,prio,EngineLayer::instance()->getPassedTime());
+			}
+			else
+			snd->push_back(new SoundInstance(sound,(*buf)[i]->sound,prio,EngineLayer::instance()->getPassedTime()));
+		}
+		else
+		(*snd)[sndpos]=new SoundInstance(sound,(*buf)[i]->sound,prio,EngineLayer::instance()->getPassedTime());
+	}
 
 	return sndpos;
 }
@@ -431,26 +506,37 @@ int _engineprivate::CallbackPlaySound(int i,float l,float r,int prio,int loops,f
 void _engineprivate::CallbackPauseSound(int i)
 {
 	std::vector<SoundInstance*> *snd=EngineLayer::instance()->getSounds();
+	if ((*snd)[i]->sound)
 	(*snd)[i]->sound->pause();
+	if ((*snd)[i]->music)
+	(*snd)[i]->music->pause();
 }
 
 void _engineprivate::CallbackUnpauseSound(int i)
 {
 	std::vector<SoundInstance*> *snd=EngineLayer::instance()->getSounds();
+	if ((*snd)[i]->sound)
 	if ((*snd)[i]->sound->getStatus()==sf::SoundSource::Status::Paused)
 	(*snd)[i]->sound->play();
+	if ((*snd)[i]->music)
+	if ((*snd)[i]->music->getStatus()==sf::SoundSource::Status::Paused)
+	(*snd)[i]->music->play();
 }
 
 void _engineprivate::CallbackStopSound(int i)
 {
 	std::vector<SoundInstance*> *snd=EngineLayer::instance()->getSounds();
+	if ((*snd)[i]->sound)
 	(*snd)[i]->sound->stop();
+	if ((*snd)[i]->music)
+	(*snd)[i]->music->stop();
+
 	delete (*snd)[i];
 	(*snd)[i]=NULL;
 
 	if (i==snd->size()-1)
 	{
-		while((snd->back())==NULL)
+		while(snd->size()>0&&(*snd)[snd->size()-1]==NULL)
 		snd->pop_back();
 	}
 }
@@ -458,7 +544,10 @@ void _engineprivate::CallbackStopSound(int i)
 void _engineprivate::CallbackSpeedSound(int i,float spd)
 {
 	std::vector<SoundInstance*> *snd=EngineLayer::instance()->getSounds();
+	if ((*snd)[i]->sound)
 	(*snd)[i]->sound->setPitch(spd);
+	if ((*snd)[i]->music)
+	(*snd)[i]->music->setPitch(spd);
 }
 
 void _engineprivate::CallbackVolumeSound(int i,float left,float right)
@@ -469,7 +558,10 @@ void _engineprivate::CallbackVolumeSound(int i,float left,float right)
 	right/=ratio;
 	float pos=(left+right)/2.0f;
 	sf::Vector3f pan(pos,0,pos<0?-pos-1.0f:pos-1.0f);
+	if ((*snd)[i]->sound)
 	(*snd)[i]->sound->setVolume(ratio*100.0f);
+	if ((*snd)[i]->music)
+	(*snd)[i]->music->setVolume(ratio*100.0f);
 }
 
 void _engineprivate::CallbackCloseApplication()

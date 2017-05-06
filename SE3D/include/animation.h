@@ -22,6 +22,10 @@ namespace _ENGINESPACE
 		int frame;
 		
 		public:
+		inline bool isFinished()
+		{
+			return (data->getDuration()>0&&pos>=data->getDuration());
+		}
 		inline Sprite* getSprite()
 		{
 			return sprite;
@@ -56,6 +60,7 @@ namespace _ENGINESPACE
 		void setSprite(Sprite *s);
 		void setData(AnimationData *d,bool reset=1);
 		void run();
+		void run(double time);
 		double getPosition();
 		int getFrame();
 		void setSpeed(double s);

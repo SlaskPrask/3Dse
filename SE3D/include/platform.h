@@ -72,6 +72,12 @@
 
 #ifdef DEBUG
 #define DEBUGFUNC(ARG) ARG
+#ifdef LOG_LOADER
+#define LOADERLOG(ARG) ARG
+#else
+#define LOADERLOG(ARG)
+#endif
 #else
 #define DEBUGFUNC(ARG)
+#define LOADERLOG(ARG)
 #endif

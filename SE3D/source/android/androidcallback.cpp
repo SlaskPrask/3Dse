@@ -280,7 +280,15 @@ GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *heig
 	}
 	else
 	{
+		LOADERLOG(Log::log("Loader",std::string("7-Creating image data for ")
+						   +to_string(destination)+" "
+						   +to_string(*width)+"x"
+						   +to_string(*height)+" from "
+						   +to_string((void*)(data))+" of type "
+						   +to_string(GL_RGBA)
+						   ));
 		_engineprivate::EngineLayer::pushLoaderData(destination,*width,*height,data,GL_RGBA);
+		LOADERLOG(Log::log("Loader",std::string("7-Data created")));
 
 		_engineprivate::EngineLayer::giveEnv(&attached);
 		return 1;//temp value
@@ -367,7 +375,15 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	}
 	else
 	{
+		LOADERLOG(Log::log("Loader",std::string("7-Creating font data for ")
+						   +to_string(destination)+" "
+						   +to_string(texsizew)+"x"
+						   +to_string(texsizeh)+" from "
+						   +to_string((void*)data)+" of type "
+						   +to_string(GL_RGBA)
+						   ));
 		_engineprivate::EngineLayer::pushLoaderData(destination,texsizew,texsizeh,data,GL_RGBA);
+		LOADERLOG(Log::log("Loader",std::string("7-Data created")));
 
 		_engineprivate::EngineLayer::giveEnv(&attached);
 		return 1;//temp value
@@ -430,15 +446,16 @@ bool _engineprivate::CallbackOpenURL(const std::string &uri)
 	return i!=0;
 }
 
-int _engineprivate::CallbackLoadSound(const std::string &s)
+int _engineprivate::CallbackLoadSound(const std::string &s,bool stream)
 {
 	bool attached;
 	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
 	jstring str=e->NewStringUTF(s.c_str());
 	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
 	
-	jmethodID m=e->GetStaticMethodID(c,"sndLoad","(Ljava/lang/String;)I");
-	int snd=e->CallStaticIntMethod(c,m,str);
+	jmethodID m=e->GetStaticMethodID(c,"sndLoad","(Ljava/lang/String;I)I");
+	int strm=stream?1:0;
+	int snd=e->CallStaticIntMethod(c,m,str,strm);
 	e->DeleteLocalRef(str);
 
 	_engineprivate::EngineLayer::giveEnv(&attached);

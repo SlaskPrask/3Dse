@@ -12,6 +12,7 @@ Resource::Resource()
 	type=TypeEmpty;
 	size=_FONT_DEFAULT_SIZE;
 	fontchars=_FONT_SET_CHARACTERS;
+	streamed=0;
 }
 
 Resource::~Resource()
@@ -31,7 +32,7 @@ void Resource::load(volatile bool threaded)
 			data=new Sprite(EngineLayer::instance()->resourceDirectory(file),threaded);
 			break;
 		case TypeSound:
-			data=new Sound(EngineLayer::instance()->resourceDirectory(file),threaded);
+			data=new Sound(EngineLayer::instance()->resourceDirectory(file),threaded,streamed);
 			break;
 		case TypeFont:
 			data=new Font(EngineLayer::instance()->resourceDirectory(file),size,fontchars,threaded);
@@ -69,9 +70,10 @@ void Resource::setSprite(const std::string &s)
 	file=s;
 }
 
-void Resource::setSound(const std::string &s)
+void Resource::setSound(const std::string &s,bool stream)
 {
 	type=TypeSound;
+	streamed=stream;
 	file=s;
 }
 

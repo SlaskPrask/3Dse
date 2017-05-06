@@ -53,7 +53,7 @@
 #define _DEFAULT_TITLE "Game"
 
 //release num,dev stage,patch,[0=alpha 1=beta 2=candidate 3=release]
-#define ENGINEVERSION "1.3.1.2"
+#define ENGINEVERSION "1.4.1.2"
 
 namespace _engineprivate
 {
@@ -538,18 +538,22 @@ namespace _engineprivate
 		}
 		inline void sndVolume(int i,double l,double r)
 		{
+			if (i!=-1)
 			CallbackVolumeSound(i,(float)l,(float)r);
 		}
 		inline void sndSpeed(int i,double s)
 		{
+			if (i!=-1)
 			CallbackSpeedSound(i,(float)s);
 		}
 		inline void sndUnpause(int i)
 		{
+			if (i!=-1)
 			CallbackUnpauseSound(i);
 		}
 		inline void sndPause(int i)
 		{
+			if (i!=-1)
 			CallbackPauseSound(i);
 		}
 		inline void setMasterCollision(Collision *cm)

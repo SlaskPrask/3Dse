@@ -28,14 +28,20 @@ namespace _ENGINESPACE
 		bool _deathMark;
 		inline Resource* getSpriteResource(unsigned int i)
 		{
+			if (i<0||i>=sprites.size())
+			return NULL;
 			return sprites[i];
 		}
 		inline Resource* getSoundResource(unsigned int i)
 		{
+			if (i<0||i>=sounds.size())
+			return NULL;
 			return sounds[i];
 		}
 		inline Resource* getFontResource(unsigned int i)
 		{
+			if (i<0||i>=fonts.size())
+			return NULL;
 			return fonts[i];
 		}
 		
@@ -43,7 +49,8 @@ namespace _ENGINESPACE
 		ResourceSet();
 		~ResourceSet();
 		Resource* addSprite(const std::string &s);
-		Resource* addSound(const std::string &s);
+		Resource* addSound(const std::string &s,bool stream=0);
+		Resource* addMusic(const std::string &s);
 		Resource* addFont(const std::string &s,int sz=_FONT_DEFAULT_SIZE,unsigned int characters=_FONT_SET_CHARACTERS);
 		void load(volatile bool threaded=0,volatile unsigned int *counter=NULL,volatile bool *quitter=0,Loader *loader=0);
 		void unload();

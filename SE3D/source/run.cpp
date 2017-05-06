@@ -93,13 +93,27 @@ void EngineLayer::coreRun(double delta)
 
 	//loader
 	loadlock.lock();
+	LOADERLOG(bool loader_empty=loaderdata.empty());
+	LOADERLOG(if (!loader_empty) Log::log("Loader main","0-Begin retrieve"));
 	while(!loaderdata.empty())
 	{
+		LOADERLOG(std::string logdat=to_string((void*)(*loaderdata.begin()).data));
+		LOADERLOG(Log::log("Loader main",std::string("0-Retrieving to ")
+						   +to_string((*loaderdata.begin()).destination)+" "
+						   +to_string((*loaderdata.begin()).texwidth)+"x"
+						   +to_string((*loaderdata.begin()).texheight)+" from "
+						   +to_string((void*)(*loaderdata.begin()).data)+" of type "
+						   +to_string((*loaderdata.begin()).type)
+						   ));
 		_engine::generateTexture((*loaderdata.begin()).destination,(*loaderdata.begin()).texwidth,(*loaderdata.begin()).texheight,(*loaderdata.begin()).data,(*loaderdata.begin()).type);
+		LOADERLOG(Log::log("Loader main",std::string("0-Done ")+to_string((void*)((*loaderdata.begin()).data))));
 		delete[] ((*loaderdata.begin()).data);
+		LOADERLOG(Log::log("Loader main",std::string("0-Deleted ")+logdat));
 		loaderdata.erase(loaderdata.begin());
+		LOADERLOG(Log::log("Loader main",std::string("0-Erased ")+logdat));
 	}
 	pullResources=0;
+	LOADERLOG(if (!loader_empty) Log::log("Loader main","0-End retrieve"));
 	loadlock.unlock();
 
 	//events

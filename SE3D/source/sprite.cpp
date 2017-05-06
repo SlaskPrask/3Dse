@@ -27,6 +27,12 @@ void Sprite::load(const std::string &file,volatile bool threaded)
 {
 	unload();
 	
+	if (threaded)
+	{//threaded cannot assign texture after the loader started, loader may have already given it a value
+		texture=1;
+		CallbackLoadPNG(file,&w,&h,threaded,&texture);
+	}
+	else
 	texture=CallbackLoadPNG(file,&w,&h,threaded,&texture);
 	
 	if (texture==0)

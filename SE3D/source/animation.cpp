@@ -67,6 +67,11 @@ void Animation::run()
 	setPosition(pos+speed);
 }
 
+void Animation::run(double time)
+{
+	setPosition(pos+speed*time);
+}
+
 double Animation::getPosition()
 {
 	return pos;

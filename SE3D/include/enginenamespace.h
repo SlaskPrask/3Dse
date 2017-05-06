@@ -307,18 +307,24 @@ namespace _ENGINESPACE
 	{
 		EngineLayer::instance()->drawEllipse(x,y,w,h,rot,r,g,b,a);
 	}*/
-	/*
-	void drawAnimationExt(Animation* anim,double x,double y,double w,double h,double rot,double r,double g,double b,double a);//undocced
-	void drawAnimation(Animation* anim,double x,double y);//undocced
-	inline void drawAnimation(Animation* anim,double x,double y,double w,double h)//undocced
+	
+	inline void drawAnimationExt(Animation* anim,double x,double y,double w,double h,double rot,double r,double g,double b,double a)
+	{
+		EngineLayer::instance()->drawSprite(anim->getSprite(),x,y,w,h,anim->getFromX(),anim->getFromY(),anim->getToX(),anim->getToY(),rot,r,g,b,a);
+	}
+	inline void drawAnimation(Animation* anim,double x,double y)
+	{
+		drawAnimationExt(anim,x,y,anim->getWidth(),anim->getHeight(),0,1,1,1,1);
+	}
+	inline void drawAnimation(Animation* anim,double x,double y,double w,double h)
 	{
 		drawAnimationExt(anim,x,y,w,h,0,1,1,1,1);
 	}
-	inline void drawAnimationRot(Animation* anim,double x,double y,double w,double h,double rot)//undocced
+	inline void drawAnimationRot(Animation* anim,double x,double y,double w,double h,double rot)
 	{
 		drawAnimationExt(anim,x,y,w,h,rot,1,1,1,1);
 	}
-	*/
+	
 	inline void setBackgroundColor(double r,double g,double b)
 	{
 		EngineLayer::instance()->setBackgroundColor(r,g,b);
@@ -393,6 +399,10 @@ namespace _ENGINESPACE
 	inline void unpauseSound(int i)
 	{
 		EngineLayer::instance()->sndUnpause(i);
+	}
+	inline void resumeSound(int i)
+	{
+		unpauseSound(i);
 	}
 	inline void pauseSound(int i)
 	{

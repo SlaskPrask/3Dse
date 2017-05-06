@@ -69,8 +69,10 @@ EngineLayer::EngineLayer()
 		Log::log("Engine",verstr);
 	}
 
+	#ifndef ANDROID
 	if (!Log::isPrinting())
 	Log::notify("Engine","Unable to write log file");
+	#endif
 
 	pullResources=0;
 
