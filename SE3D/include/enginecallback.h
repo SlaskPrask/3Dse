@@ -19,6 +19,8 @@ namespace _engineprivate
 	void EngineLayerSetupJNI(JNIEnv* env, jobject obj);
 	#endif
 
+	void CallbackGamesConnect();
+	void CallbackGamesDisconnect();
 	void CallbackStartAds(const std::string &adKey,int size,bool top);
 	void CallbackEndAds();
 	bool CallbackDeleteFile(const std::string &f);
@@ -35,8 +37,9 @@ namespace _engineprivate
 	void CallbackRequestInput(int type);
 	void CallbackSetFPS(int fps);
 	bool CallbackOpenURL(const std::string &uri);
-	GLuint CallbackLoadPNG(const std::string &s,int *width,int *height,bool threaded=0,GLuint *destination=0);
-	GLuint CallbackLoadFont(const std::string &s,int size,Font *fnt,int startc,int camount,int totalchars=_FONT_SET_CHARACTERS,bool threaded=0,GLuint *destination=0);
+	void CallbackKeepScreenOn(bool on);
+	GLuint CallbackLoadPNG(const std::string &s,int *width,int *height,bool smooth=1,bool threaded=0,GLuint *destination=0);
+	GLuint CallbackLoadFont(const std::string &s,int size,Font *fnt,int startc,int camount,int totalchars=_FONT_SET_CHARACTERS,bool smooth=1,bool threaded=0,GLuint *destination=0);
 	int CallbackLoadSound(const std::string &s,bool stream);
 	void CallbackUnloadSound(int i);
 	int CallbackPlaySound(int i,float l,float r,int prio,int loops,float speed);

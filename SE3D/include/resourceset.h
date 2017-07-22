@@ -48,7 +48,11 @@ namespace _ENGINESPACE
 		public:
 		ResourceSet();
 		~ResourceSet();
-		Resource* addSprite(const std::string &s);
+		Resource* addSprite(const std::string &s,bool smoothed=1);
+		inline Resource* addSpriteSharp(const std::string &s)
+		{
+			return addSprite(s,0);
+		}
 		Resource* addSound(const std::string &s,bool stream=0);
 		Resource* addMusic(const std::string &s);
 		Resource* addFont(const std::string &s,int sz=_FONT_DEFAULT_SIZE,unsigned int characters=_FONT_SET_CHARACTERS);

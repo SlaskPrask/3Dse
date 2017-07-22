@@ -89,7 +89,7 @@ void Camera::doFollow()
 		else
 		if (*yfollow<y+boundsTop)
 		{
-			y=*yfollow>y-boundsTop;
+			y=*yfollow-boundsTop;
 			checkYLimits();
 		}
 		else

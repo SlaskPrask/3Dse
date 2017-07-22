@@ -52,8 +52,15 @@
 #endif
 #define _DEFAULT_TITLE "Game"
 
+#ifndef MIN
+#define MIN(a,b)(a<b?a:b)
+#endif
+#ifndef MAX
+#define MAX(a,b)(a>b?a:b)
+#endif
+
 //release num,dev stage,patch,[0=alpha 1=beta 2=candidate 3=release]
-#define ENGINEVERSION "1.4.1.2"
+#define ENGINEVERSION "1.5.1.2"
 
 namespace _engineprivate
 {
@@ -82,14 +89,41 @@ namespace _engineprivate
 		bool focusGained;
 		bool focusLost;
 		bool adChange;
+		bool textsubmit;
+		bool gamesConnected,gamesDisconnected,gamesSuspended;
+		int screenw,screenh;
+		double deviceScale;
 		double adSize;
+		double statusHeight;
 		std::string keyboardinput;
 		std::vector<MouseEvent> mouseEvents;
 		LayerState()
 		{
-			adChange=backButton=windowResized=closed=paused=resumed=focusGained=focusLost=0;
+			adChange=backButton=windowResized=closed=paused=resumed=focusGained=focusLost=textsubmit=0;
+			gamesConnected=gamesDisconnected=gamesSuspended=0;
 			keyboardinput="";
-			adSize=0;
+			adSize=statusHeight=0;
+			deviceScale=1;
+			screenw=screenh=1;
+		}
+	};
+
+	struct Games
+	{
+		bool online;
+		int id;
+		std::string nick;
+		std::string realname;
+		inline void reset()
+		{
+			online=0;
+			id=0;
+			nick="";
+			realname="";
+		}
+		Games()
+		{
+			reset();
 		}
 	};
 
@@ -99,7 +133,8 @@ namespace _engineprivate
 		GLubyte *data;
 		int texwidth,texheight;
 		GLenum type;
-		LoaderData(GLuint *dst,int w,int h,GLubyte *d,GLenum t):destination(dst),data(d),texwidth(w),texheight(h),type(t)
+		bool smooth;
+		LoaderData(GLuint *dst,int w,int h,GLubyte *d,GLenum t,bool s):destination(dst),data(d),texwidth(w),texheight(h),type(t),smooth(s)
 		{};
 	};
 
@@ -122,14 +157,18 @@ namespace _engineprivate
 		bool closed;
 		bool paused,resumed;
 		bool focusGained,focusLost;
+		bool gamesConnected,gamesDisconnected,gamesSuspended;
 		bool adChange;
-		double adSize;
+		bool textsubmit;
+		double adSize,deviceScale,statusHeight;
+		int screenw,screenh;
 		std::string keyboardinput;
 		bool forcedRelease;
 
 		unsigned long long int passedTime;
 		
 		int mouseX[_MAX_MOUSES],mouseY[_MAX_MOUSES],mouseState[_MAX_MOUSES][_MAX_MOUSE_BUTTONS];
+		bool mouseBufferRelease[_MAX_MOUSES][_MAX_MOUSE_BUTTONS];
 		double mouseTX[_MAX_MOUSES],mouseTY[_MAX_MOUSES];
 		int mousePresses[_MAX_MOUSES];
 		
@@ -191,6 +230,7 @@ namespace _engineprivate
 		FT_Library *fontLib;
 		#endif
 		GLuint defaultTexture;
+		double screenoff;
 		int fps;
 		int windowType;
 		int orientation;
@@ -224,6 +264,12 @@ namespace _engineprivate
 		bool vsync;
 		std::string title;
 		std::string iconfile;
+
+		//games
+		Games games;
+		void gamesDisconnect();
+		void gamesSuspend();
+		void gamesProfile(int id,std::string nick,std::string realname);
 
 		public:
 		inline static EngineLayer* instance()
@@ -271,7 +317,7 @@ namespace _engineprivate
 		static void setGameWindowResizeFunc(void(*func)());
 		static void setGameFocusGainFunc(void(*func)());
 		static void setGameFocusLossFunc(void(*func)());
-		static void pushLoaderData(GLuint *destination,int texwidth,int texheight,GLubyte *data,GLenum type);;
+		static void pushLoaderData(GLuint *destination,int texwidth,int texheight,GLubyte *data,GLenum type,bool smooth);
 		void run(double delta);
 		void switchScene(Scene *scn);
 		void createObject(Object *o);
@@ -385,6 +431,10 @@ namespace _engineprivate
 			return frameMultiplier*debugTimeScale;
 		}
 		#endif
+		inline double getDelta()
+		{
+			return frameTime*getTimeScale();
+		}
 		inline void setTimeScale(double d)
 		{
 			frameMultiplier=d;
@@ -588,6 +638,11 @@ namespace _engineprivate
 		void reapplyGL();
 		void setSize(int w,int h);
 		void setRenderSize();
+		inline void screenOffset(double off)
+		{
+			screenoff=off;
+		}
+		double getKeyboardSize();
 		inline void contextLost()
 		{
 			initGL();
@@ -631,6 +686,18 @@ namespace _engineprivate
 		double getCameraY();
 		double getCameraW();
 		double getCameraH();
+		inline bool getTextSubmitted()
+		{
+			return textsubmit;
+		}
+		inline double getDeviceScale()
+		{
+			return deviceScale;
+		}
+		inline double getStatusBarHeight()
+		{
+			return statusHeight;
+		}
 		inline bool getFocusEvent()
 		{
 			return focusGained;
@@ -678,11 +745,9 @@ namespace _engineprivate
 		{
 			return passedTime;
 		}
-		inline void setBackgroundColor(double fr,double fg,double fb)
+		inline void setStayAwake(bool awake=1)
 		{
-			r=(GLfloat)fr;
-			g=(GLfloat)fg;
-			b=(GLfloat)fb;
+			CallbackKeepScreenOn(awake);
 		}
 		inline void restoreColor()
 		{
@@ -871,8 +936,8 @@ namespace _engineprivate
 		static void printGLErrors(std::string pos);
 		void removeTouchable(Touchable *t);
 		void parseTouchables();
-		void drawRectangle(double x,double y,double w,double h,double rot,double r,double g,double b,double a);
-		void drawPoly(double x1,double y1,double x2,double y2,double x3,double y3,double rot,double r,double g,double b,double a);
+		void drawRectangle(double x,double y,double w,double h,double rot,double r,double g,double b,double a,bool wire=0);
+		void drawPoly(double x1,double y1,double x2,double y2,double x3,double y3,double rot,double r,double g,double b,double a,bool wire=0);
 		void drawSpriteFinal(Sprite* sprite,double x,double y,double w,double h,double texx1,double texy1,double texx2,double texy2,double texx3,double texy3,double texx4,double texy4,double rot,double r,double g,double b,double a);
 		inline void drawSprite(Sprite* sprite,double x,double y,double w,double h,double fromx,double fromy,double tox,double toy,double rot,double r,double g,double b,double a)
 		{
@@ -881,6 +946,50 @@ namespace _engineprivate
 		//void drawSpritePolyTex(Sprite* sprite,double x1,double y1,double x2,double y2,double x3,double y3,double texx1,double texy1,double texx2,double texy2,double texx3,double texy3,double rot,double r,double g,double b,double a);
 		void drawText(Font *font,const std::string &str,double x,double y,double size,double lineSpacing,double r,double g,double b,double a,int align=0);
 		void getTextMetrics(Font *font,const std::string &str,double size,double lineSpacing,double *w,double *h);
+
+		//games
+		static void(*gameGamesConnectedFunc)();
+		static void(*gameGamesDisconnectedFunc)();
+		static void(*gameGamesSuspendedFunc)();
+		static void setGameGamesConnectedFunc(void(*func)());
+		static void setGameGamesDisconnectedFunc(void(*func)());
+		static void setGameGamesSuspendedFunc(void(*func)());
+		inline bool getGamesOnline()
+		{
+			return games.online;
+		}
+		inline std::string getGamesNick()
+		{
+			return games.online?games.nick:"";
+		}
+		inline std::string getGamesRealName()
+		{
+			return games.online?games.realname:"";
+		}
+		inline int getGamesId()
+		{
+			return games.online?games.id:0;
+		}
+		inline bool getGamesConnected()
+		{
+			return gamesConnected;
+		}
+		inline bool getGamesSuspended()
+		{
+			return gamesSuspended;
+		}
+		inline bool getGamesDisconnected()
+		{
+			return gamesDisconnected;
+		}
+		inline void gamesRequestConnect()
+		{
+			CallbackGamesConnect();
+		}
+		inline void gamesRequestDisconnect()
+		{
+			CallbackGamesDisconnect();
+		}
 
 		//debug
 		#ifdef DEBUG

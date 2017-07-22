@@ -277,5 +277,8 @@ void Collision::draw(bool c)
 		child[2]->draw(1);
 		child[3]->draw(0);
 	}
+
+	for (std::vector<Hitbox*>::iterator it=hitbox.begin();it!=hitbox.end();++it)
+	(*it)->draw();
 }
 #endif

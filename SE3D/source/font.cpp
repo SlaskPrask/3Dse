@@ -23,12 +23,13 @@ void Font::init()
 	ratio=1;
 	yratio=1;
 	xoff=yoff=0;
+	smooth=1;
 }
 
-Font::Font(const std::string &file,int s,unsigned int numchars,volatile bool threaded)
+Font::Font(const std::string &file,int s,unsigned int numchars,bool smoothed,volatile bool threaded)
 {
 	init();
-	load(file,s,numchars,threaded);
+	load(file,s,numchars,smoothed,threaded);
 }
 
 void Font::setData(int startc,int camount,float meas[3],float *charwidth,int texsizew,int texsizeh,int xoff,int yoff)
@@ -46,10 +47,12 @@ void Font::setData(int startc,int camount,float meas[3],float *charwidth,int tex
 	this->yoff=yoff;//(double)texsize/16.0f/3.0f; //-charsize/3.0f
 }
 
-void Font::load(const std::string &file,int s,unsigned int numchars,volatile bool threaded)
+void Font::load(const std::string &file,int s,unsigned int numchars,bool smoothed,volatile bool threaded)
 {
 	unload();
-	
+
+	smooth=smoothed;
+
 	size=s;
 	if (size<4)
 	size=4;
@@ -63,7 +66,7 @@ void Font::load(const std::string &file,int s,unsigned int numchars,volatile boo
 
 	for(unsigned int i=0;i<textures;i++)
 	{
-		texture[i]=CallbackLoadFont(file,size,this,i*_FONT_SET_CHARACTERS,(i+1)*_FONT_SET_CHARACTERS,characters,threaded,&(texture[i]));
+		texture[i]=CallbackLoadFont(file,size,this,i*_FONT_SET_CHARACTERS,(i+1)*_FONT_SET_CHARACTERS,characters,smooth,threaded,&(texture[i]));
 		if (texture[i]==0)
 		valid=0;
 	}
@@ -82,7 +85,7 @@ void Font::reload()
 	bool valid=1;
 	for (unsigned int i=0;i<textures;i++)
 	{
-		texture[i]=CallbackLoadFont(resource,size,this,i*_FONT_SET_CHARACTERS,(i+1)*_FONT_SET_CHARACTERS,characters,0,&(texture[i]));
+		texture[i]=CallbackLoadFont(resource,size,this,i*_FONT_SET_CHARACTERS,(i+1)*_FONT_SET_CHARACTERS,characters,smooth,0,&(texture[i]));
 		if (texture[i]==0)
 			valid=0;
 	}

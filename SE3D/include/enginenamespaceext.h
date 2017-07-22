@@ -1,10 +1,13 @@
 #pragma once
 
 #include "enginesettings.h"
-#include "enginenamespace.h"
+#include <string>
+#include <climits>
+#include <cmath>
+#include "enginelayer.h"
+#include "font.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
-#include <cmath>
 
 namespace _ENGINESPACE
 {
@@ -67,12 +70,12 @@ namespace _ENGINESPACE
 		return (x1-x2)==0?(y1-y2<0?270:90):radToDeg((x1-x2)>0?M_PI+atan((y2-y1)/(x1-x2)):((y2-y1<=0)?((y2-y1==0)?0:atan((y2-y1)/(x1-x2))):2*M_PI+atan((y2-y1)/(x1-x2))));
 	}
 	template<class T>
-	inline char getByte(T i,unsigned int pos=0)
+	inline char getByte(const T i,unsigned int pos=0)
 	{
 		return (i>>(8*(T)pos))&((T)0xFF);
 	}
 	template<>
-	inline char getByte<bool>(bool i,unsigned int pos)
+	inline char getByte<bool>(const bool i,unsigned int pos)
 	{
 		return i?0x01:0x00;
 	}
@@ -90,13 +93,24 @@ namespace _ENGINESPACE
 		return value!=0x00;
 	}
 	template<class T>
-	inline bool writeBytes(std::string *str,T value,unsigned int bytes=0)
+	inline bool writeBytes(std::string *str,const T value,unsigned int bytes=0)
 	{
 		if (bytes==0)
 		bytes=sizeof(T);
 
 		for (unsigned int i=0;i<bytes;i++)
 		*str+=(char)getByte(value,bytes-1-i);
+
+		return 1;
+	}
+	template<>
+	inline bool writeBytes<std::string>(std::string *str,const std::string value,unsigned int bytes)
+	{
+		if (bytes==0)
+		bytes=(unsigned int)(value.length());
+
+		for (unsigned int i=0;i<bytes;i++)
+		*str+=value[i];
 
 		return 1;
 	}
@@ -130,5 +144,21 @@ namespace _ENGINESPACE
 
 		return 1;
 	}
+	template<>
+	inline bool readBytes<std::string>(std::string *str,std::string *value,unsigned int bytes)
+	{
+		if (bytes==0)
+		bytes=1;
 
+		*value="";
+		for (unsigned int i=0;i<bytes;i++)
+		{
+			if (str->empty())
+			return 0;
+			*value+=(*str)[0];
+			str->erase(0,1);
+		}
+
+		return 1;
+	}
 }

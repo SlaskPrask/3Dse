@@ -32,7 +32,7 @@ jstring _engineprivate::EngineLayerStringEvent(JNIEnv *env,jobject obj, jint id,
 	jsize size=env->GetArrayLength(arg);
 	std::string *value=new std::string[size];
 	for(int i=0;i<size;i++)
-	value[i]=(const char*)env->GetStringUTFChars((jstring)env->GetObjectArrayElement(arg,i),0);
+	value[i]=(const char*)env->GetStringChars((jstring)env->GetObjectArrayElement(arg,i),0);
 
 	result=env->NewStringUTF(_engineprivate::EngineLayer::stringEvent(id,size,value).c_str());
 
@@ -43,6 +43,30 @@ jstring _engineprivate::EngineLayerStringEvent(JNIEnv *env,jobject obj, jint id,
 void _engineprivate::EngineLayerSetupJNI(JNIEnv* env, jobject obj)
 {
 	_engineprivate::EngineLayer::setJVM(env);
+}
+
+void _engineprivate::CallbackGamesConnect()
+{
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
+	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
+
+	jmethodID m=e->GetStaticMethodID(c,"gamesConnect","()V");
+	e->CallStaticVoidMethod(c,m);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
+}
+
+void _engineprivate::CallbackGamesDisconnect()
+{
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
+	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
+
+	jmethodID m=e->GetStaticMethodID(c,"gamesDisconnect","()V");
+	e->CallStaticVoidMethod(c,m);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
 }
 
 void _engineprivate::CallbackStartAds(const std::string &adKey,int size,bool top)
@@ -166,6 +190,19 @@ bool _engineprivate::CallbackUnsetFullscreen()
 	return (set!=0);
 }
 
+void _engineprivate::CallbackKeepScreenOn(bool on)
+{
+	bool attached;
+	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
+	jclass c=*_engineprivate::EngineLayer::instance()->getEngineLayer();
+
+	jint allow=on?0:1;
+	jmethodID m=e->GetStaticMethodID(c,"allowSleep","(I)V");
+	e->CallStaticVoidMethod(c,m,allow);
+
+	_engineprivate::EngineLayer::giveEnv(&attached);
+}
+
 bool _engineprivate::CallbackSetFullscreen()
 {
 	bool attached;
@@ -224,7 +261,7 @@ void _engineprivate::CallbackSetOrientation(int orientation)
 	_engineprivate::EngineLayer::giveEnv(&attached);
 }
 
-GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *height,bool threaded,GLuint *destination)
+GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *height,bool smooth,bool threaded,GLuint *destination)
 {
 	bool attached;
 	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
@@ -272,7 +309,7 @@ GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *heig
 	{
 		GLuint tex=0;
 
-		_engine::generateTexture(&tex,*width,*height,data,GL_RGBA);
+		_engine::generateTexture(&tex,*width,*height,data,GL_RGBA,smooth);
 
 		_engineprivate::EngineLayer::giveEnv(&attached);
 		delete[] data;
@@ -287,7 +324,7 @@ GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *heig
 						   +to_string((void*)(data))+" of type "
 						   +to_string(GL_RGBA)
 						   ));
-		_engineprivate::EngineLayer::pushLoaderData(destination,*width,*height,data,GL_RGBA);
+		_engineprivate::EngineLayer::pushLoaderData(destination,*width,*height,data,GL_RGBA,smooth);
 		LOADERLOG(Log::log("Loader",std::string("7-Data created")));
 
 		_engineprivate::EngineLayer::giveEnv(&attached);
@@ -297,7 +334,7 @@ GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *heig
 	return 0;
 }
 
-GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,int startc,int camount,int totalchars,bool threaded,GLuint *destination)
+GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,int startc,int camount,int totalchars,bool smooth,bool threaded,GLuint *destination)
 {
 	bool attached;
 	JNIEnv *e=_engineprivate::EngineLayer::getEnv(&attached);
@@ -367,7 +404,7 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	{
 		GLuint tex=0;
 
-		_engine::generateTexture(&tex,texsizew,texsizeh,data,GL_RGBA);
+		_engine::generateTexture(&tex,texsizew,texsizeh,data,GL_RGBA,smooth);
 
 		_engineprivate::EngineLayer::giveEnv(&attached);
 		delete[] data;
@@ -382,7 +419,7 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 						   +to_string((void*)data)+" of type "
 						   +to_string(GL_RGBA)
 						   ));
-		_engineprivate::EngineLayer::pushLoaderData(destination,texsizew,texsizeh,data,GL_RGBA);
+		_engineprivate::EngineLayer::pushLoaderData(destination,texsizew,texsizeh,data,GL_RGBA,smooth);
 		LOADERLOG(Log::log("Loader",std::string("7-Data created")));
 
 		_engineprivate::EngineLayer::giveEnv(&attached);

@@ -27,6 +27,16 @@ void _engineprivate::CallbackSetIcon(const std::string &s)
 	window->setIcon(image.getSize().x,image.getSize().y,image.getPixelsPtr());
 }
 
+void _engineprivate::CallbackGamesConnect()
+{
+	/*TODO*/
+}
+
+void _engineprivate::CallbackGamesDisconnect()
+{
+	/*TODO*/
+}
+
 void _engineprivate::CallbackStartAds(const std::string &adKey,int size,bool top)
 {
 	/*empty, not supported*/
@@ -105,7 +115,7 @@ void _engineprivate::CallbackSetOrientation(int orientation)
 	/*empty, handled on the inside*/
 }
 
-GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *height,bool threaded,GLuint *destination)
+GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *height,bool smooth,bool threaded,GLuint *destination)
 {
 	sf::Image image;
 	if (!image.loadFromFile(s))
@@ -143,7 +153,7 @@ GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *heig
 	{
 		GLuint tex=0;
 
-		_engine::generateTexture(&tex,*width,*height,data,GL_RGBA);
+		_engine::generateTexture(&tex,*width,*height,data,GL_RGBA,smooth);
 
 		delete[] data;
 		return tex;
@@ -157,14 +167,14 @@ GLuint _engineprivate::CallbackLoadPNG(const std::string &s,int *width,int *heig
 						   +to_string((void*)data)+" of type "
 						   +to_string(GL_RGBA)
 						   ));
-		EngineLayer::pushLoaderData(destination,*width,*height,data,GL_RGBA);
+		EngineLayer::pushLoaderData(destination,*width,*height,data,GL_RGBA,smooth);
 		LOADERLOG(Log::log("Loader",std::string("7-Data created")));
 		return 1;//temp value
 	}
 	return 0;
 }
 
-GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,int startc,int camount,int totalchars,bool threaded,GLuint *destination)
+GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,int startc,int camount,int totalchars,bool smooth,bool threaded,GLuint *destination)
 {
 	FT_Library *lib=EngineLayer::instance()->getFontLib();
 	if (!lib)
@@ -309,7 +319,7 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 	{
 		GLuint tex=0;
 
-		_engine::generateTexture(&tex,texsizew,texsizeh,data,GL_LUMINANCE_ALPHA);
+		_engine::generateTexture(&tex,texsizew,texsizeh,data,GL_LUMINANCE_ALPHA,smooth);
 
 		delete[] data;
 		return tex;
@@ -323,11 +333,16 @@ GLuint _engineprivate::CallbackLoadFont(const std::string &s,int size,Font *fnt,
 						   +to_string((void*)data)+" of type "
 						   +to_string(GL_LUMINANCE_ALPHA)
 						   ));
-		EngineLayer::pushLoaderData(destination,texsizew,texsizeh,data,GL_LUMINANCE_ALPHA);
+		EngineLayer::pushLoaderData(destination,texsizew,texsizeh,data,GL_LUMINANCE_ALPHA,smooth);
 		LOADERLOG(Log::log("Loader",std::string("7-Data created")));
 		return 1;//temp value
 	}
 	return 0;
+}
+
+void _engineprivate::CallbackKeepScreenOn(bool on)
+{
+	//TODO?
 }
 
 void _engineprivate::CallbackMessage(const std::string &s)

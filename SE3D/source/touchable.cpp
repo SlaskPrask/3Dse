@@ -48,6 +48,11 @@ Touchable* Touchable::setPosition(double xp,double yp)
 {
 	xr=xp;
 	yr=yp;
+	if (pointer==NULL)
+	{
+		x=xr;
+		y=yr;
+	}
 	return this;
 }
 

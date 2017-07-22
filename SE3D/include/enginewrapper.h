@@ -39,7 +39,7 @@ namespace _engine
 		return id++;
 	}
 	bool isObjectDestroyed(Object* o);
-	void generateTexture(GLuint *destination,int texwidth,int texheight,GLubyte *data,GLenum type);
+	void generateTexture(GLuint *destination,int texwidth,int texheight,GLubyte *data,GLenum type,bool smooth=1);
 
 	struct MainFunction
 	{

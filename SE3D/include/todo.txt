@@ -21,6 +21,7 @@ function to escape default draw stuff and use custom gl instead
 remove using namespaces from .h namespaces
 
 sensors
+also check which are available
  accelerometer
  gravity
  magnetometer
@@ -34,19 +35,20 @@ volume buttons
  read states
  disable volume control
 
-ads
- admob
- build, edit, left tab, ads
-
 other mouse buttons and wheel on touchables
-
-fonts don't need to be loaded in powers of two
- android and engine
+ multiple mouses on touchables (multitouch like possu)
 
 inherit tags
 collision object rotation variable (pos&orient combined)
+rest of collision shapes
+collision debug draw
+
+more draw shapes
+ oval
+ line
+  thick line (pixel width default)
+
 initial object positioning thing (hitbox things)
-try catch unable to load font asset and return null
 
 gamepad
 
@@ -54,6 +56,7 @@ show message compability
 
 default font
 default texture
+ actually use it
 
 const &everything
 
@@ -64,16 +67,11 @@ multishader support
  etc
  and compose all
 
-pc works with std::string values -128 to 127
- android works with values 0 to 256
-
-inspect font textures
- remove second font texture as strings only go to 256
+tweak inheritance to only cpp (wish it was h)
 
 hidden assets
-
-same way android does main, do listing of objects and scenes
-
-realign fonts, bits visible (border of 2 not enough)
-
-icons from assets
+resource compiler
+ combine to one file
+ generate .h/cpp with variables to all locations/names
+ translation files
+  generate .h/cpp with variables to all translation values

@@ -96,6 +96,10 @@ namespace _engineprivate
 			return object;
 		}
 
+		#ifdef DEBUG
+		virtual void draw();
+		#endif
+
 		void move();
 	};
 }

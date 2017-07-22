@@ -201,3 +201,30 @@ Hitbox::~Hitbox()
 	map->remove(this);
 }
 
+#ifdef DEBUG
+void Hitbox::draw()
+{
+	EngineLayer *instance=EngineLayer::instance();
+	switch (type)
+	{
+		default:
+		case Box:
+			//TODO
+			instance->drawRectangle(*ox+x,*oy+y,x2-x,y2-y,0,0,1,0,.5,0);
+			break;
+		case Line:
+			//TODO
+			instance->drawPoly(*ox+x,*oy+y,*ox+x2,*oy+y2,*ox+x2,*oy+y2,0,0,1,0,.5,1);
+			break;
+		case Polygon:
+			//TODO
+			instance->drawPoly(*ox+x,*oy+y,*ox+x2,*oy+y2,*ox+x3,*oy+y3,0,0,1,0,.5,1);
+			break;
+		case Ellipse:
+			//TODO
+			instance->drawRectangle(*ox+x,*oy+y,x2-x,y2-y,0,0,1,0,.5,0);
+			break;
+	}
+}
+#endif
+

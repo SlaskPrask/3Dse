@@ -105,7 +105,7 @@ void EngineLayer::coreRun(double delta)
 						   +to_string((void*)(*loaderdata.begin()).data)+" of type "
 						   +to_string((*loaderdata.begin()).type)
 						   ));
-		_engine::generateTexture((*loaderdata.begin()).destination,(*loaderdata.begin()).texwidth,(*loaderdata.begin()).texheight,(*loaderdata.begin()).data,(*loaderdata.begin()).type);
+		_engine::generateTexture((*loaderdata.begin()).destination,(*loaderdata.begin()).texwidth,(*loaderdata.begin()).texheight,(*loaderdata.begin()).data,(*loaderdata.begin()).type,(*loaderdata.begin()).smooth);
 		LOADERLOG(Log::log("Loader main",std::string("0-Done ")+to_string((void*)((*loaderdata.begin()).data))));
 		delete[] ((*loaderdata.begin()).data);
 		LOADERLOG(Log::log("Loader main",std::string("0-Deleted ")+logdat));
@@ -147,6 +147,14 @@ void EngineLayer::coreRun(double delta)
 	switchingScenes=0;
 	if (scene)
 	scene->run();
+
+	//games
+	if (gamesConnected&&gameGamesConnectedFunc)
+	gameGamesConnectedFunc();
+	if (gamesSuspended&&gameGamesSuspendedFunc)
+	gameGamesSuspendedFunc();
+	if (gamesDisconnected&&gameGamesDisconnectedFunc)
+	gameGamesDisconnectedFunc();
 
 	//objects
 	DepthItem *di,*diNext;

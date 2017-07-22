@@ -21,6 +21,7 @@ namespace _ENGINESPACE
 		private:
 		int w,h;
 		GLuint texture;
+		bool smooth;
 		inline void bind()
 		{
 			glBindTexture(GL_TEXTURE_2D,texture);
@@ -31,13 +32,13 @@ namespace _ENGINESPACE
 		{
 			return texture;
 		}
-		void load(const std::string &file,volatile bool threaded=0);
+		void load(const std::string &file,bool smoothed=1,volatile bool threaded=0);
 		void unload();
 		void init();
 		
 		public:
 		Sprite();
-		Sprite(const std::string &file,volatile bool threaded=0);
+		Sprite(const std::string &file,bool smoothed=1,volatile bool threaded=0);
 		inline int getWidth()
 		{
 			return w;

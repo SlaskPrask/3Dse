@@ -12,6 +12,7 @@ Resource::Resource()
 	type=TypeEmpty;
 	size=_FONT_DEFAULT_SIZE;
 	fontchars=_FONT_SET_CHARACTERS;
+	smooth=1;
 	streamed=0;
 }
 
@@ -29,7 +30,7 @@ void Resource::load(volatile bool threaded)
 		case TypeEmpty:
 			break;
 		case TypeSprite:
-			data=new Sprite(EngineLayer::instance()->resourceDirectory(file),threaded);
+			data=new Sprite(EngineLayer::instance()->resourceDirectory(file),smooth,threaded);
 			break;
 		case TypeSound:
 			data=new Sound(EngineLayer::instance()->resourceDirectory(file),threaded,streamed);
@@ -64,10 +65,11 @@ void Resource::unload()
 	}
 }
 
-void Resource::setSprite(const std::string &s)
+void Resource::setSprite(const std::string &s,bool smoothed)
 {
 	type=TypeSprite;
 	file=s;
+	smooth=smoothed;
 }
 
 void Resource::setSound(const std::string &s,bool stream)

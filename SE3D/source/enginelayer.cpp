@@ -27,9 +27,12 @@ int EngineLayer::event(int id, int size, int *value)
 			/*not used in android, used in desktop callback*/
 			instance()->state.closed=1;
 			return 0;
-		case 2://surface change(w,h)
+		case 2://surface change(w,h,device scale,screenw,screenh)
 			instance()->setSize(value[0],value[1]);
 			instance()->state.windowResized=1;
+			instance()->state.deviceScale=((double)value[2]/100.0f);
+			instance()->state.screenw=value[3];
+			instance()->state.screenh=value[4];
 			return 0;
 		case 3://back button
 			instance()->state.backButton=1;
@@ -48,7 +51,9 @@ int EngineLayer::event(int id, int size, int *value)
 			if (instance()->gameFocusLossFunc)
 			instance()->gameFocusLossFunc();
 			return 0;
-		case 8://run
+		case 8://run(delta,screenoffset,statusbar height)
+			instance()->screenOffset((double)value[1]);
+			instance()->state.statusHeight=(double)value[2];
 			instance()->run(value[0]<=0?0.001:(double)value[0]/1000.0f);
 			return 0;
 		case 9://pause
@@ -72,6 +77,15 @@ int EngineLayer::event(int id, int size, int *value)
 				instance()->state.adSize=adRatio;
 			}
 			return 0;
+		case 13://submit text
+			instance()->state.textsubmit=1;
+			return 0;
+		case 14://games connection failed
+			instance()->gamesDisconnect();
+			return 0;
+		case 15://games connection suspended
+			instance()->gamesSuspend();
+			return 0;
 	}
 	return 0;
 }
@@ -87,8 +101,8 @@ std::string EngineLayer::stringEvent(int id, int size, std::string *value)
 			{
 				instance()->state.keyboardinput="";
 				for (unsigned int i=0;i<value[0].length();i++)
-					if (value[0][i]<256)
-						instance()->state.keyboardinput+=value[0][i];
+				if (value[0][i]<256)
+				instance()->state.keyboardinput+=value[0][i];
 			}
 			break;
 		case 1://version report
@@ -96,6 +110,10 @@ std::string EngineLayer::stringEvent(int id, int size, std::string *value)
 				Log::log("Engine",std::string("Platform version ")+value[0]+" "+value[1]+" "+value[2]+" SDK "+value[3]);
 			}
 			break;
+		case 2://games profile
+			{
+				instance()->gamesProfile(instance()->strToI(value[0]),value[1],value[2]);
+			}
 	}
 	return ret;
 }
@@ -111,9 +129,19 @@ void EngineLayer::eventParser()
 	focusLost=state.focusLost;
 	keyboardinput=state.keyboardinput;
 	adChange=state.adChange;
-	adSize=state.adSize;
-	state.adChange=state.backButton=state.windowResized=state.closed=state.paused=state.resumed=state.focusGained=state.focusLost=0;
+	textsubmit=state.textsubmit;
+	state.adChange=state.backButton=state.windowResized=state.closed=state.paused=state.resumed=state.focusGained=state.focusLost=state.textsubmit=0;
 	state.keyboardinput="";
+	gamesConnected=state.gamesConnected;
+	gamesDisconnected=state.gamesDisconnected;
+	gamesSuspended=state.gamesSuspended;
+	state.gamesConnected=state.gamesSuspended=state.gamesDisconnected=0;
+	//no reset
+	screenw=state.screenw;
+	screenh=state.screenh;
+	adSize=state.adSize;
+	statusHeight=state.statusHeight;
+	deviceScale=state.deviceScale;
 	
 	if (windowResized)
 	{
@@ -137,8 +165,9 @@ void EngineLayer::eventParser()
 		for (int j=0;j<_MAX_MOUSE_BUTTONS;j++)
 		{
 			mousePresses[i]=-1;
-			if (forcedRelease||paused)
+			if (forcedRelease||paused||mouseBufferRelease[i][j])
 			{
+				mouseBufferRelease[i][j]=0;
 				switch (mouseState[i][j])
 				{
 					default:
@@ -279,16 +308,16 @@ void EngineLayer::eventParser()
 		{
 			//could ignore this if the "if"'s in cases fail
 			mouseX[me.which]=me.x;
-			mouseY[me.which]=me.y;
+			mouseY[me.which]=me.y-(int)(getKeyboardSize()/getRegionH()*(double)getHeight());
 			if (getCameraW()==getWidth())
-			mouseTX[me.which]=getCameraX()+(double)me.x;
+			mouseTX[me.which]=getCameraX()+(double)mouseX[me.which];
 			else
-			mouseTX[me.which]=-getHorBar()+getCameraX()+(double)me.x/(double)getWidth()*getRegionW();
+			mouseTX[me.which]=-getHorBar()+getCameraX()+(double)mouseX[me.which]/(double)getWidth()*getRegionW();
 
 			if (getCameraH()==getHeight())
-			mouseTY[me.which]=getCameraY()+(double)me.y;
+			mouseTY[me.which]=getCameraY()+(double)mouseY[me.which];
 			else
-			mouseTY[me.which]=-getVerBar()+getCameraY()+(double)me.y/(double)getHeight()*getRegionH();
+			mouseTY[me.which]=-getVerBar()+getCameraY()+(double)mouseY[me.which]/(double)getHeight()*getRegionH();
 
 			switch (me.type)
 			{
@@ -298,8 +327,11 @@ void EngineLayer::eventParser()
 				case MouseEvent::Unheld:
 					break;
 				case MouseEvent::Release:
-					if (mouseState[me.which][me.button]==MouseEvent::Held||mouseState[me.which][me.button]==MouseEvent::Press)
+					if (mouseState[me.which][me.button]==MouseEvent::Held)
 					mouseState[me.which][me.button]=MouseEvent::Release;
+					else
+					if (mouseState[me.which][me.button]==MouseEvent::Press)
+					mouseBufferRelease[me.which][me.button]=1;
 					break;
 				case MouseEvent::Press:
 					if (mouseState[me.which][me.button]==MouseEvent::Unheld||mouseState[me.which][me.button]==MouseEvent::Release)

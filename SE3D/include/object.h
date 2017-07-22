@@ -16,32 +16,78 @@ namespace _ENGINESPACE
 
 namespace _engineprivate
 {
-	template<class T>
+	class _ObjectInheritanceHelper
+	{
+		public:
+		template<class O,class T>
+		static void registerParent(void *oc)
+		{
+			O::_registerParent<O,T>(oc);
+		}
+		template<class T>
+		static void add(Object *o)
+		{
+			T::_addInstance(o);
+		}
+		template<class T>
+		static void remove(Object *o)
+		{
+			T::_removeInstance(o);
+		}
+	};
+	
 	class _ObjectChild
 	{
-		Object *instance;
-		_ObjectChild(Object *i):instance(i)
+		public:
+		virtual void add(Object *o)
 		{
-			T::_addInstance(instance);
 		}
-		~_ObjectChild()
+		virtual void remove(Object *o)
 		{
-			T::_removeInstance(instance);
+		}
+	};
+
+	template<class O,class T>
+	class _ObjectChildDefinition:public _ObjectChild
+	{
+		public:
+		_ObjectChildDefinition()
+		{
+			_ObjectInheritanceHelper::registerParent<O,T>(this);
+		}
+		virtual void add(Object *o)
+		{
+			_ObjectInheritanceHelper::add<T>(o);
+		}
+		virtual void remove(Object *o)
+		{
+			_ObjectInheritanceHelper::remove<T>(o);
+		}
+		~_ObjectChildDefinition()
+		{
+			//TODO unregister
 		}
 	};
 }
 
-#define INHERITS(OBJECTCLASS) \
-private: \
-_engineprivate::_ObjectChild<OBJECTCLASS>(this);
+#define INHERIT(CHILD,PARENT) \
+_engineprivate::_ObjectChildDefinition<CHILD,PARENT> _inheritance_ ## CHILD ## _ ## PARENT;
+
 
 #define OBJECT \
 private:\
 friend class _engineprivate::EngineLayer;\
-static std::vector<Object*>* _child()\
+friend class _engineprivate::_ObjectChild;\
+friend class _engineprivate::_ObjectInheritanceHelper;\
+static std::vector<_engineprivate::_ObjectChild*>* _parent()\
 {\
-	static std::vector<Object*> i;\
+	static std::vector<_engineprivate::_ObjectChild*> i;\
 	return &i;\
+}\
+template<class C,class P>\
+static void _registerParent(void *ref)\
+{\
+	_parent()->push_back(static_cast<_engineprivate::_ObjectChildDefinition<C,P>*>(ref));\
 }\
 static std::vector<Object*>* _instance()\
 {\
@@ -53,12 +99,17 @@ static unsigned int _instPos(bool f)\
 	static unsigned int i;\
 	return (f?++i:i=0);\
 }\
+public:\
 static void _addInstance(Object *inst)\
 {\
+	for (std::vector<_engineprivate::_ObjectChild*>::iterator it=_parent()->begin();it!=_parent()->end();++it)\
+	(*it)->add(inst);\
 	_instance()->push_back(inst);\
 }\
 static void _removeInstance(Object *inst)\
 {\
+	for (std::vector<_engineprivate::_ObjectChild*>::iterator it=_parent()->begin();it!=_parent()->end();++it)\
+	(*it)->remove(inst);\
 	std::vector<Object*>::iterator it=std::find(_instance()->begin(),_instance()->end(),inst);\
 	_instance()->erase(it);\
 }\
@@ -202,10 +253,12 @@ namespace _ENGINESPACE
 		inline Object* setVisible(bool v=1)
 		{
 			_visible=v;
+			return this;
 		}
 		inline Object* unsetVisible()
 		{
 			_visible=0;
+			return this;
 		}
 		Object* setPersistent(bool p=1);
 		Object* unsetPersistent();

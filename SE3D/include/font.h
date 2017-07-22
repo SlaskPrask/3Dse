@@ -27,6 +27,7 @@ namespace _ENGINESPACE
 		
 		private:
 		int size;
+		bool smooth;
 		unsigned int characters,textures;
 		double *charw;
 		double lineh,fonth,descent,ascent;
@@ -45,14 +46,14 @@ namespace _ENGINESPACE
 		{
 			return texture[i];
 		}
-		void load(const std::string &file,int s=_FONT_DEFAULT_SIZE,unsigned int numchars=_FONT_SET_CHARACTERS,volatile bool threaded=0);
+		void load(const std::string &file,int s=_FONT_DEFAULT_SIZE,unsigned int numchars=_FONT_SET_CHARACTERS,bool smoothed=1,volatile bool threaded=0);
 		void unload();
 		void init();
 		void setData(int startc,int camount,float meas[3],float *charwidth,int texsizew,int texsizeh,int xoff,int yoff);
 		
 		public:
 		Font();
-		Font(const std::string &file,int s=_FONT_DEFAULT_SIZE,unsigned int numchars=_FONT_SET_CHARACTERS,volatile bool threaded=0);
+		Font(const std::string &file,int s=_FONT_DEFAULT_SIZE,unsigned int numchars=_FONT_SET_CHARACTERS,bool smoothed=1,volatile bool threaded=0);
 		~Font();
 	};
 }

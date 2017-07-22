@@ -83,7 +83,7 @@ namespace _ENGINESPACE
 		}
 		inline unsigned int getFrames()
 		{
-			return frames.size();
+			return (unsigned int)frames.size();
 		}
 		int getFrameAt(double pos);
 		void addFrameStrip(double x,double y,double w,double h,int imagesx,int start,int length,double duration=1);

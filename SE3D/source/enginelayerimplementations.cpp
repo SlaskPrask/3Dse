@@ -13,6 +13,9 @@ void(*EngineLayer::gameStartFunc)()=NULL;
 void(*EngineLayer::gameWindowResizeFunc)()=NULL;
 void(*EngineLayer::gameFocusGainFunc)()=NULL;
 void(*EngineLayer::gameFocusLossFunc)()=NULL;
+void(*EngineLayer::gameGamesConnectedFunc)()=NULL;
+void(*EngineLayer::gameGamesDisconnectedFunc)()=NULL;
+void(*EngineLayer::gameGamesSuspendedFunc)()=NULL;
 
 #ifdef ANDROID
 const bool EngineLayer::mobile=1;
@@ -77,6 +80,7 @@ EngineLayer::EngineLayer()
 	pullResources=0;
 
 	//graphics
+	screenoff=0;
 	defaultTexture=0;
 	fps=60;
 	defaultCamera=new Camera();
@@ -215,7 +219,18 @@ EngineLayer::EngineLayer()
 	focusGained=focusLost=0;
 	adChange=0;
 	adSize=0;
+	statusHeight=0;
+	gamesConnected=gamesSuspended=gamesDisconnected=0;
+	#ifdef ANDROID
+	screenw=screenh=1;
+	#else
+	sf::VideoMode vm=sf::VideoMode::getDesktopMode();
+	state.screenw=screenw=vm.width;
+	state.screenh=screenh=vm.height;//TODO: UPDATE IN RES
+	#endif
+	deviceScale=1;
 	resumed=paused=0;
+	textsubmit=0;
 	focus=1;
 	keyboardinput="";
 	srand((unsigned int)time(NULL));
@@ -243,7 +258,10 @@ EngineLayer::EngineLayer()
 		mouseWheelUp[i]=0;
 		mouseWheelDown[i]=0;
 		for(int j=0;j<_MAX_MOUSE_BUTTONS;j++)
-		mouseState[i][j]=MouseEvent::Unheld;
+		{
+			mouseState[i][j]=MouseEvent::Unheld;
+			mouseBufferRelease[i][j]=0;
+		}
 	}
 
 	//debug
@@ -276,7 +294,7 @@ void EngineLayer::updateDefaultTexture()
 				data[(i+j*16)*4+3]=0xFF;
 			}
 		}
-		_engine::generateTexture(&defaultTexture,16,16,data,GL_RGBA);
+		_engine::generateTexture(&defaultTexture,16,16,data,GL_RGBA,1);
 	}
 }
 
@@ -337,14 +355,34 @@ void EngineLayer::setResourceDirectory(const std::string &str)
 	#endif
 }
 
+void EngineLayer::gamesDisconnect()
+{
+	games.reset();
+}
+
+void EngineLayer::gamesSuspend()
+{
+	games.online=0;
+}
+
+void EngineLayer::gamesProfile(int id,std::string nick,std::string realname)
+{
+	games.online=1;
+
+	games.id=id;
+	games.nick=nick;
+	games.realname=realname;
+}
+
 void EngineLayer::addKeyboardChar(std::string *s,bool newlines,unsigned int valuelimit)
 {
 	for (unsigned int i=0;i<keyboardstr.size();i++)
 	{
-		unsigned int value=keyboardstr[i]<0?256-keyboardstr[i]:keyboardstr[i];
-		if (value<valuelimit)
+		//unsigned int value=keyboardstr[i]<0?256-keyboardstr[i]:keyboardstr[i];
+		int value=keyboardstr[i];
+		if (value<512)//TODO hardcoded value limit
 		{
-			if (value<32)//special characters
+			if (value<32&&value>=0)//special characters
 			switch (value)
 			{
 				default:
@@ -352,6 +390,7 @@ void EngineLayer::addKeyboardChar(std::string *s,bool newlines,unsigned int valu
 				case '\n'://newline
 				case '\r'://carriage return
 					if (newlines)
+					if (s->length()<valuelimit)
 					*s+='\n';
 					break;
 				case '\b'://backspace
@@ -365,6 +404,7 @@ void EngineLayer::addKeyboardChar(std::string *s,bool newlines,unsigned int valu
 				case 127://delete
 					break;
 				default:
+					if (s->length()<valuelimit)
 					*s+=value;
 					break;
 			}
@@ -475,6 +515,7 @@ bool EngineLayer::setFullscreen(int w,int h)
 	#endif
 	printGLErrors("Window creation");
 
+	//TODO: state.deviceScale
 	if (!window)
 	{
 		Log::error("Graphics","Unable to go fullscreen, window failed");
@@ -515,6 +556,7 @@ bool EngineLayer::setWindowed(int w,int h)
 	#endif
 	printGLErrors("Window creation");
 
+	//TODO: state.deviceScale
 	if (!window)
 	{
 		Log::error("Graphics","Unable to go windowed, window failed");
@@ -559,6 +601,7 @@ bool EngineLayer::setFullscreenWindowed()
 
 	window->setPosition(sf::Vector2i(0,0));
 
+	//TODO: state.deviceScale
 	if (!window)
 	{
 		Log::error("Graphics","Unable to go fullscreen windowed, window failed");
@@ -577,12 +620,12 @@ bool EngineLayer::setFullscreenWindowed()
 	#endif
 }
 
-void EngineLayer::pushLoaderData(GLuint *destination,int texwidth,int texheight,GLubyte *data,GLenum type)
+void EngineLayer::pushLoaderData(GLuint *destination,int texwidth,int texheight,GLubyte *data,GLenum type,bool smooth)
 {
 	EngineLayer *i=instance();
 
 	i->loadlock.lock();
-	i->loaderdata.push_back(LoaderData(destination,texwidth,texheight,data,type));
+	i->loaderdata.push_back(LoaderData(destination,texwidth,texheight,data,type,smooth));
 	i->pullResources=1;
 	i->loadlock.unlock();
 }
@@ -837,6 +880,18 @@ double EngineLayer::getCameraH()
 	return (activeCamera?activeCamera->getHeight():defaultCamera->getHeight());
 }
 
+double EngineLayer::getKeyboardSize()
+{
+	double move=-screenoff/(double)height*regionH;
+	if (verBars*2<move)
+	move-=verBars;
+	else
+	if (move>=verBars)
+	move=verBars;
+
+	return move;
+}
+
 void EngineLayer::drawBegin()
 {
 
@@ -844,7 +899,14 @@ void EngineLayer::drawBegin()
 	setRenderSize();
 
 	posOffset[0]=(GLfloat)(activeCamera->x-horBars);
-	posOffset[1]=(GLfloat)(activeCamera->y-verBars);
+
+	double move=-screenoff/(double)height*regionH;
+	if (verBars*2<move)
+	move-=verBars;
+	else
+	if (move>=verBars)
+	move=verBars;
+	posOffset[1]=(GLfloat)(activeCamera->y-verBars-move);
 	halfsize[0]=halfsize[1]=0;
 
 	#ifndef ANDROID
@@ -883,7 +945,15 @@ void EngineLayer::drawEnd()
 {
 	if (blackBars)
 	{
-		posOffset[0]=posOffset[1]=0;
+		double move=-screenoff/(double)height*regionH;
+		if (verBars*2<move)
+		move-=verBars;
+		else
+		if (move>=verBars)
+		move=verBars;
+
+		posOffset[0]=0;
+		posOffset[1]=-(GLfloat)move;
 		glUniform2fv(drawOffset,1,posOffset);
 		if (horBars>verBars)
 		{
@@ -900,6 +970,7 @@ void EngineLayer::drawEnd()
 	#ifndef ANDROID
 	if (window)
 	window->display();
+
 	printGLErrors("Draw end");
 	#endif
 }
@@ -998,7 +1069,7 @@ void EngineLayer::setColorization(double r,double g,double b)
 	glUniform4fv(drawColorization,1,colorizationSet);
 }
 
-void EngineLayer::drawRectangle(double x,double y,double w,double h,double rot,double r,double g,double b,double a)
+void EngineLayer::drawRectangle(double x,double y,double w,double h,double rot,double r,double g,double b,double a,bool wire)
 {
 	setRotation((GLfloat)rot,(GLfloat)w,(GLfloat)h);
 	
@@ -1013,12 +1084,12 @@ void EngineLayer::drawRectangle(double x,double y,double w,double h,double rot,d
 	squareData[5]=squareData[7]=(GLfloat)h;
 	glUniform2fv(drawTrans,1,posTrans);
 	glUniform1i(drawTextured,textured);
-	glDrawArrays(GL_TRIANGLE_STRIP,0,4);
+	glDrawArrays(wire?GL_LINE_STRIP:GL_TRIANGLE_STRIP,0,4);
 	
 	restoreColor();
 }
 
-void EngineLayer::drawPoly(double x1,double y1,double x2,double y2,double x3,double y3,double rot,double r,double g,double b,double a)
+void EngineLayer::drawPoly(double x1,double y1,double x2,double y2,double x3,double y3,double rot,double r,double g,double b,double a,bool wire)
 {
 	setRotation((GLfloat)rot);
 	double cx=(x1+x2+x3)/3.0f;
@@ -1037,7 +1108,7 @@ void EngineLayer::drawPoly(double x1,double y1,double x2,double y2,double x3,dou
 	squareData[5]=(GLfloat)(y3-cy);
 	glUniform2fv(drawTrans,1,posTrans);
 	glUniform1i(drawTextured,textured);
-	glDrawArrays(GL_TRIANGLE_STRIP,0,3);
+	glDrawArrays(wire?GL_LINE_STRIP:GL_TRIANGLE_STRIP,0,3);
 	
 	restoreColor();
 }
@@ -1094,7 +1165,7 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 	squareData[5]=squareData[7]=yoff*(GLfloat)advscale+(GLfloat)(size*scale);
 
 	std::vector<GLfloat> linew;
-	unsigned int c=0,lines=0;
+	int c=0,lines=0;
 	std::stringstream ss(str);
 	std::string ln;
 	while (std::getline(ss,ln,'\n'))
@@ -1120,7 +1191,7 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 					continue;
 				}
 
-			if (c<0||c>=font->characters)
+			if (c<0||(unsigned int)c>=font->characters)
 				continue;
 
 			offset+=(GLfloat)font->charw[c];
@@ -1147,14 +1218,15 @@ void EngineLayer::drawText(Font *font,const std::string &str,double x,double y,d
 			break;
 	}
 	posTrans[1]=(GLfloat)(y-size*scale+font->fonth*advscale);
+
 	for(unsigned int i=0;i<str.length();i++)
 	{
 		c=str.at(i);
 		if (c<0)
-			c=256-c;
+		c=256+c;//+ because negative
 
-		if (c<0||c>=font->characters)
-			continue;
+		if (c<0||(unsigned int)c>=font->characters)
+		continue;
 
 		if (c=='\n')
 		{
@@ -1213,7 +1285,7 @@ void EngineLayer::getTextMetrics(Font *font,const std::string &str,double size,d
 	GLfloat advscale=(GLfloat)(size/(double)font->size);
 
 	GLfloat textw=0;
-	unsigned int c=0,lines=0;
+	int c=0,lines=0;
 	std::stringstream ss(str);
 	std::string ln;
 	while (std::getline(ss,ln,'\n'))
@@ -1222,7 +1294,7 @@ void EngineLayer::getTextMetrics(Font *font,const std::string &str,double size,d
 		int mode=0,modelength=0;
 		for (unsigned int i=0;i<ln.size();i++)
 		{
-			c=ln.at(i)<0?256-ln.at(i):ln.at(i);
+			c=ln.at(i)<0?256+ln.at(i):ln.at(i);
 
 			if (modelength>0)
 			{
@@ -1239,7 +1311,7 @@ void EngineLayer::getTextMetrics(Font *font,const std::string &str,double size,d
 				continue;
 			}
 
-			if (c<0||c>=font->characters)
+			if (c<0||(unsigned int)c>=font->characters)
 				continue;
 
 			offset+=(GLfloat)font->charw[c];
@@ -1276,6 +1348,19 @@ void EngineLayer::setGameFocusGainFunc(void(*func)())
 void EngineLayer::setGameFocusLossFunc(void(*func)())
 {
 	EngineLayer::gameFocusLossFunc=func;
+}
+
+static void setGameGamesConnectedFunc(void(*func)())
+{
+	EngineLayer::gameGamesConnectedFunc=func;
+}
+static void setGameGamesDisconnectedFunc(void(*func)())
+{
+	EngineLayer::gameGamesDisconnectedFunc=func;
+}
+static void setGameGamesSuspendedFunc(void(*func)())
+{
+	EngineLayer::gameGamesSuspendedFunc=func;
 }
 
 void EngineLayer::createObject(Object *o)

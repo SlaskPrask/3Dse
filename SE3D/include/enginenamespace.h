@@ -6,6 +6,7 @@
 #include <cmath>
 #include "enginelayer.h"
 #include "font.h"
+#include "enginenamespaceext.h"
 
 namespace _ENGINESPACE
 {
@@ -66,6 +67,10 @@ namespace _ENGINESPACE
 	{
 		return EngineLayer::instance()->getFocusEvent();
 	}
+	inline bool isTextSubmitted()
+	{
+		return EngineLayer::instance()->getTextSubmitted();
+	}
 	inline bool isFocusLost()
 	{
 		return EngineLayer::instance()->getUnfocusEvent();
@@ -106,7 +111,14 @@ namespace _ENGINESPACE
 	{
 		return EngineLayer::instance()->loaderDone();
 	}
-
+	inline std::string getResourceFilename(const std::string &str)
+	{
+		return EngineLayer::instance()->resourceDirectory(str);
+	}
+	inline std::string getFilename(const std::string &str)
+	{
+		return EngineLayer::instance()->workingDirectory(str);
+	}
 	inline void setResourceDirectory(const std::string &str)
 	{
 		EngineLayer::instance()->setResourceDirectory(str);
@@ -114,6 +126,10 @@ namespace _ENGINESPACE
 	inline double getAdHeight()
 	{
 		return EngineLayer::instance()->getAdHeight();
+	}
+	inline double getDeviceScale()
+	{
+		return EngineLayer::instance()->getDeviceScale();
 	}
 	inline double getAdWindowHeight()
 	{
@@ -136,7 +152,7 @@ namespace _ENGINESPACE
 	template<class T>
 	T* getScene()
 	{
-		return getScene()->sceneId()==EngineLayer::instance()->getSceneId<T>()?static_cast<T*>(getScene()):NULL;
+		return (!getScene()?NULL:(getScene()->sceneId()==EngineLayer::instance()->getSceneId<T>()?static_cast<T*>(getScene()):NULL));
 	}
 	template<class T>
 	unsigned int getObjectId()
@@ -263,6 +279,14 @@ namespace _ENGINESPACE
 	{
 		EngineLayer::instance()->drawSprite(sprite,x,y,w,h,0,0,1,1,rot,r,g,b,a);
 	}
+	inline void drawSpriteColor(Sprite* sprite,double x,double y,double w,double h,double r,double g,double b,double a)
+	{
+		EngineLayer::instance()->drawSprite(sprite,x,y,w,h,0,0,1,1,0,r,g,b,a);
+	}
+	inline void drawSpritePart(Sprite* sprite,double x,double y,double w,double h,double fromx,double fromy,double tox,double toy)
+	{
+		EngineLayer::instance()->drawSprite(sprite,x,y,w,h,fromx,fromy,tox,toy,0,1,1,1,1);
+	}
 	inline void drawSpriteExt(Sprite* sprite,double x,double y,double w,double h,double fromx,double fromy,double tox,double toy,double rot,double r,double g,double b,double a)
 	{
 		EngineLayer::instance()->drawSprite(sprite,x,y,w,h,fromx,fromy,tox,toy,rot,r,g,b,a);
@@ -307,27 +331,39 @@ namespace _ENGINESPACE
 	{
 		EngineLayer::instance()->drawEllipse(x,y,w,h,rot,r,g,b,a);
 	}*/
-	
-	inline void drawAnimationExt(Animation* anim,double x,double y,double w,double h,double rot,double r,double g,double b,double a)
+
+	inline void setStayAwake(bool awake=1)
 	{
-		EngineLayer::instance()->drawSprite(anim->getSprite(),x,y,w,h,anim->getFromX(),anim->getFromY(),anim->getToX(),anim->getToY(),rot,r,g,b,a);
+		EngineLayer::instance()->setStayAwake(awake);
+	}
+	inline void unsetStayAwake()
+	{
+		EngineLayer::instance()->setStayAwake(0);
+	}
+
+	inline void drawAnimationExt(Animation* anim,double x,double y,double w,double h,double rot,double fromx,double fromy,double tox,double toy,double r,double g,double b,double a)
+	{
+		EngineLayer::instance()->drawSprite(anim->getSprite(),x,y,w,h,transform(fromx,anim->getFromX(),anim->getToX()),transform(fromy,anim->getFromY(),anim->getToY()),transform(tox,anim->getFromX(),anim->getToX()),transform(toy,anim->getFromY(),anim->getToY()),rot,r,g,b,a);
+	}
+	inline void drawAnimationColorRot(Animation* anim,double x,double y,double w,double h,double rot,double r,double g,double b,double a)
+	{
+		drawAnimationExt(anim,x,y,w,h,rot,0,0,1,1,r,g,b,a);
+	}
+	inline void drawAnimationPart(Animation* anim,double x,double y,double w,double h,double fromx,double fromy,double tox,double toy)
+	{
+		drawAnimationExt(anim,x,y,w,h,0,fromx,fromy,tox,toy,1,1,1,1);
 	}
 	inline void drawAnimation(Animation* anim,double x,double y)
 	{
-		drawAnimationExt(anim,x,y,anim->getWidth(),anim->getHeight(),0,1,1,1,1);
+		drawAnimationExt(anim,x,y,anim->getWidth(),anim->getHeight(),0,0,0,1,1,1,1,1,1);
 	}
 	inline void drawAnimation(Animation* anim,double x,double y,double w,double h)
 	{
-		drawAnimationExt(anim,x,y,w,h,0,1,1,1,1);
+		drawAnimationExt(anim,x,y,w,h,0,0,0,1,1,1,1,1,1);
 	}
 	inline void drawAnimationRot(Animation* anim,double x,double y,double w,double h,double rot)
 	{
-		drawAnimationExt(anim,x,y,w,h,rot,1,1,1,1);
-	}
-	
-	inline void setBackgroundColor(double r,double g,double b)
-	{
-		EngineLayer::instance()->setBackgroundColor(r,g,b);
+		drawAnimationExt(anim,x,y,w,h,rot,0,0,1,1,1,1,1,1);
 	}
 	inline void setColorization(double r,double g,double b)
 	{
@@ -427,11 +463,11 @@ namespace _ENGINESPACE
 	int getSceneHeight();
 	inline double getFrameTime()
 	{
-		return EngineLayer::instance()->getFrameTime();
+		return EngineLayer::instance()->getDelta();
 	}
 	inline double delta()
 	{
-		return getFrameTime()*EngineLayer::instance()->getTimeScale();
+		return getFrameTime();
 	}
 	inline double getTimeScale()
 	{
@@ -445,13 +481,13 @@ namespace _ENGINESPACE
 	{
 		EngineLayer::instance()->sendMessage(str);
 	}
-	inline void requestInput()
+	inline void requestInput(bool newlines=0)
 	{
-		EngineLayer::instance()->requestInput();
+		EngineLayer::instance()->requestInput(newlines);
 	}
-	inline void requestInputText()
+	inline void requestInputText(bool newlines=0)
 	{
-		requestInput();
+		requestInput(newlines);
 	}
 	inline void requestInputNumber()
 	{
@@ -526,11 +562,11 @@ namespace _ENGINESPACE
 	{
 		return getMouseIdle(i,0);
 	}
-	inline void getTouchPresses(int i[_MAX_MOUSES])//get all
+	inline void getTouchPresses(int i[_MAX_MOUSES])//get a list of pressed mouse numbers
 	{
 		EngineLayer::instance()->getMousePresses(i);
 	}
-	inline int getTouchPresses(int i)//get one at id
+	inline int getTouchPresses(int i)//get number of pressed mouse in list of mouses
 	{
 		return EngineLayer::instance()->getMousePresses(i);
 	}
@@ -550,6 +586,10 @@ namespace _ENGINESPACE
 	{
 		return EngineLayer::instance()->getKeyHeld(i);
 	}
+	inline bool getKey(int i)
+	{
+		return getKeyHeld(i);
+	}
 	inline bool getKeyIdle(int i)
 	{
 		return EngineLayer::instance()->getKeyIdle(i);
@@ -562,7 +602,7 @@ namespace _ENGINESPACE
 	{
 		return EngineLayer::instance()->getMouseWheelDown(i);
 	}
-	inline void keyboardTextBuffer(std::string *str,bool newlines=0,unsigned int valuelimit=256)
+	inline void keyboardTextBuffer(std::string *str,unsigned int valuelimit=256,bool newlines=0)
 	{
 		EngineLayer::instance()->addKeyboardChar(str,newlines,valuelimit);
 	}
@@ -573,6 +613,10 @@ namespace _ENGINESPACE
 	inline bool getAnyKeyRelease()
 	{
 		return EngineLayer::instance()->getAnyKeyRelease();
+	}
+	inline double getKeyboardSize()
+	{
+		return EngineLayer::instance()->getKeyboardSize();
 	}
 
 	//???
@@ -617,6 +661,18 @@ namespace _ENGINESPACE
 	inline void setGameFocusLossFunction(void(*func)(void))
 	{
 		EngineLayer::instance()->setGameFocusLossFunc(func);
+	}
+	inline void setGameProfileConnectedFunction(void(*func)(void))
+	{
+		EngineLayer::instance()->setGameGamesConnectedFunc(func);
+	}
+	inline void setGameProfileDisconnectedFunction(void(*func)(void))
+	{
+		EngineLayer::instance()->setGameGamesDisconnectedFunc(func);
+	}
+	inline void setGameProfileSuspendedFunction(void(*func)(void))
+	{
+		EngineLayer::instance()->setGameGamesSuspendedFunc(func);
 	}
 	inline void setOrientationLandscape()
 	{
@@ -678,7 +734,29 @@ namespace _ENGINESPACE
 	template<typename T>
 	inline T random(T max)
 	{
-		return rand()%(max);
+		return max>0?rand()%(max):0;
+	}
+	inline double random(double max)
+	{
+		int full=(int)max;
+		double dec=max-full;
+		if (full>=1)
+		{
+			full--;
+			dec+=1;
+		}
+		return (double)(full>0?rand()%full:0)+(rand()%((int)(dec*100.0f)))/100.0f;
+	}
+	inline float random(float max)
+	{
+		int full=(int)max;
+		float dec=max-full;
+		if (full>=1)
+		{
+			full--;
+			dec+=1;
+		}
+		return (float)(full>0?rand()%full:0)+(rand()%((int)(dec*100.0f)))/100.0f;
 	}
 	inline void beginTag(Tag *t)
 	{
@@ -731,6 +809,47 @@ namespace _ENGINESPACE
 	inline double getScreenRatio()
 	{
 		return EngineLayer::instance()->getScreenRatio();
+	}
+
+	inline void profileConnect()
+	{
+		return EngineLayer::instance()->gamesRequestConnect();
+	}
+	inline void profileDisconnect()
+	{
+		return EngineLayer::instance()->gamesRequestDisconnect();
+	}
+	inline bool isProfileConnected()
+	{
+		return EngineLayer::instance()->getGamesConnected();
+	}
+	inline bool isProfileDisconnected()
+	{
+		return EngineLayer::instance()->getGamesDisconnected();
+	}
+	inline bool isProfileSuspended()
+	{
+		return EngineLayer::instance()->getGamesSuspended();
+	}
+	inline bool getProfileOnline()
+	{
+		return EngineLayer::instance()->getGamesOnline();
+	}
+	inline std::string getProfileNick()
+	{
+		return EngineLayer::instance()->getGamesNick();
+	}
+	inline std::string getProfileName()
+	{
+		return getProfileNick();
+	}
+	inline std::string getProfileRealName()
+	{
+		return EngineLayer::instance()->getGamesRealName();
+	}
+	inline int getProfileId()
+	{
+		return EngineLayer::instance()->getGamesId();
 	}
 
 	std::string getKeyName(int keycode);

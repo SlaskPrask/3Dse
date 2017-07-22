@@ -62,7 +62,7 @@ void Animation::setSpeed(double s)
 void Animation::run()
 {
 	if (data->getRealTime())
-	setPosition(pos+speed*EngineLayer::instance()->getFrameTime());
+	setPosition(pos+speed*EngineLayer::instance()->getDelta());
 	else
 	setPosition(pos+speed);
 }

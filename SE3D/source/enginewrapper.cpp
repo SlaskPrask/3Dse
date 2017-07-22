@@ -19,7 +19,7 @@ unsigned int _engineprivate::hexStrToInt(const std::string &s)
 	return x;
 }
 
-void _engine::generateTexture(GLuint *destination,int texwidth,int texheight,GLubyte *data,GLenum type)
+void _engine::generateTexture(GLuint *destination,int texwidth,int texheight,GLubyte *data,GLenum type,bool smooth)
 {
 	GLuint tex=0;
 	glGenTextures(1,&tex);
@@ -27,8 +27,8 @@ void _engine::generateTexture(GLuint *destination,int texwidth,int texheight,GLu
 
 	glBindTexture(GL_TEXTURE_2D,tex);
 	DEBUGFUNC(EngineLayer::printGLErrors("Texture bind"));
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,smooth?GL_LINEAR:GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,smooth?GL_LINEAR:GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 	DEBUGFUNC(EngineLayer::printGLErrors("Texture settings"));

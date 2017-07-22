@@ -30,10 +30,10 @@ ResourceSet::~ResourceSet()
 	delete (*it);
 }
 
-Resource* ResourceSet::addSprite(const std::string &s)
+Resource* ResourceSet::addSprite(const std::string &s,bool smoothed)
 {
 	Resource *r=new Resource();
-	r->setSprite(s);
+	r->setSprite(s,smoothed);
 	sprites.push_back(r);
 	return r;
 }
