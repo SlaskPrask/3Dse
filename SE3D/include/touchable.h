@@ -97,7 +97,7 @@ namespace _ENGINESPACE
 		{
 			return getRelease()&&isInside();
 		}
-		~Touchable();
+		virtual ~Touchable();
 
 		#ifdef DEBUG
 		void draw();

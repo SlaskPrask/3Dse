@@ -36,7 +36,7 @@ void Resource::load(volatile bool threaded)
 			data=new Sound(EngineLayer::instance()->resourceDirectory(file),threaded,streamed);
 			break;
 		case TypeFont:
-			data=new Font(EngineLayer::instance()->resourceDirectory(file),size,fontchars,threaded);
+			data=new Font(EngineLayer::instance()->resourceDirectory(file),size,fontchars,smooth,threaded);
 			break;
 	}
 }
@@ -79,16 +79,22 @@ void Resource::setSound(const std::string &s,bool stream)
 	file=s;
 }
 
-void Resource::setFont(const std::string &s,int sz,unsigned int chars)
+void Resource::setFont(const std::string &s,int sz,unsigned int chars,bool smoothed)
 {
 	type=TypeFont;
 	size=sz;
 	file=s;
 	fontchars=chars;
+	smooth=smoothed;
 }
 
 void Resource::setEmpty()
 {
 	type=TypeEmpty;
 	file="";
+}
+
+void _ResHelper::assign(_ResPointer *pointer,Resource *res)
+{
+	pointer->_r=res;
 }

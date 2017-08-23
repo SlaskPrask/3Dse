@@ -60,7 +60,7 @@
 #endif
 
 //release num,dev stage,patch,[0=alpha 1=beta 2=candidate 3=release]
-#define ENGINEVERSION "1.5.1.2"
+#define ENGINEVERSION "1.6.3.1"
 
 namespace _engineprivate
 {
@@ -145,7 +145,7 @@ namespace _engineprivate
 		JavaVM *jvm;
 		#endif
 		EngineLayer();
-		~EngineLayer();
+		virtual ~EngineLayer();
 		
 		//engine
 		LayerState state;
@@ -234,22 +234,30 @@ namespace _engineprivate
 		int fps;
 		int windowType;
 		int orientation;
+		//shader
 		GLfloat ortho[16],rot[16];
 		GLfloat posOffset[2],posTrans[2],halfsize[2];
 		GLfloat colorSet[4],colorizationSet[4];
 		GLfloat squareData[8],texData[8];
+		GLint textured;
 		GLuint drawProgram;
 		GLuint drawColorization,drawOffset,drawTrans,drawProjection,drawRotation,drawColor,drawHalfSize,drawTex,drawTextured;
-		GLint textured;
+		//frame buffer out shader
+		GLfloat internalSquareData[8],internalTexData[8];
+		GLuint internalProgram;
+		GLuint internalDrawTex;
+
 		GLfloat r,g,b;
+		GLuint frameBuffer,frameBufferTexture,frameBufferDepth;
+		GLenum drawBuffers[1];
+		unsigned int internalWidth,internalHeight;
+		bool userResolution;
 		int width,height,reqWidth,reqHeight;
 		int defaultResolutionWidth,defaultResolutionHeight;
 		Camera *defaultCamera;
 		Camera *activeCamera;
 		bool queueCamera;
 		bool blackBars;
-		double horBars,verBars;
-		double regionW,regionH;
 		double widthRatio,heightRatio;
 		bool dominantRatio;
 		std::vector<Sprite*> loadedSprites;
@@ -616,6 +624,7 @@ namespace _engineprivate
 		}
 		
 		//graphics
+		void setupInternalResolution(bool enable,unsigned int w=1,unsigned int h=1);
 		void setFontData(Font *font,int startc,int camount,float *meas,float *charwidth,int texsizew,int texsizeh,int xoff,int yoff)
 		{
 			font->setData(startc,camount,meas,charwidth,texsizew,texsizeh,xoff,yoff);
@@ -647,21 +656,13 @@ namespace _engineprivate
 		{
 			initGL();
 		}
-		inline double getVerBar()
+		inline double getVerRatio()
 		{
-			return (blackBars?verBars:0);
+			return internalSquareData[7];//y of bottom right (range -1 to 1)
 		}
-		inline double getHorBar()
+		inline double getHorRatio()
 		{
-			return (blackBars?horBars:0);
-		}
-		inline double getRegionW()
-		{
-			return regionW;
-		}
-		inline double getRegionH()
-		{
-			return regionH;
+			return internalSquareData[6];//x of bottom right (range -1 to 1)
 		}
 		Camera *getCamera();
 		void setCamera(Camera *cam);

@@ -34,7 +34,7 @@ namespace _engineprivate
 			sound=NULL;
 			streamed=1;
 		}
-		~SoundInstance()
+		virtual ~SoundInstance()
 		{
 			if (sound)
 			{
@@ -63,7 +63,7 @@ namespace _engineprivate
 		SoundStorage(sf::SoundBuffer *buffer,void *sound):buffer(buffer),sound(sound)
 		{
 		}
-		~SoundStorage()
+		virtual ~SoundStorage()
 		{
 			if (buffer)
 			delete buffer;

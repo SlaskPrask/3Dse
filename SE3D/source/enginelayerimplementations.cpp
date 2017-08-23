@@ -80,6 +80,18 @@ EngineLayer::EngineLayer()
 	pullResources=0;
 
 	//graphics
+	frameBuffer=frameBufferTexture=frameBufferDepth=0;
+	drawBuffers[0]=GL_COLOR_ATTACHMENT0;
+	internalWidth=internalHeight=0;
+	userResolution=0;
+	internalTexData[0]=(GLfloat)0;
+	internalTexData[1]=(GLfloat)0;
+	internalTexData[2]=(GLfloat)1;
+	internalTexData[3]=(GLfloat)0;
+	internalTexData[4]=(GLfloat)0;
+	internalTexData[5]=(GLfloat)1;
+	internalTexData[6]=(GLfloat)1;
+	internalTexData[7]=(GLfloat)1;
 	screenoff=0;
 	defaultTexture=0;
 	fps=60;
@@ -114,9 +126,6 @@ EngineLayer::EngineLayer()
 	texData[5]=1;
 	texData[6]=1;
 	texData[7]=1;
-	regionW=regionH=1;//?
-	blackBars=1;
-	horBars=verBars=0;
 	widthRatio=heightRatio=1;
 	dominantRatio=0;
 	resDirectory="";
@@ -295,6 +304,76 @@ void EngineLayer::updateDefaultTexture()
 			}
 		}
 		_engine::generateTexture(&defaultTexture,16,16,data,GL_RGBA,1);
+
+		frameBuffer=frameBufferTexture=frameBufferDepth=0;//ignore delete
+		setupInternalResolution(userResolution,internalWidth,internalHeight);
+	}
+}
+
+void EngineLayer::setupInternalResolution(bool enable,unsigned int w,unsigned int h)
+{
+	queueCamera=1;
+	userResolution=enable;
+
+	if (!userResolution)
+	{
+		if (((double)getCameraW()/(double)getCameraH())>((double)width/(double)height))//window is taller than view
+		{
+			w=width;
+			h=(unsigned int)round((double)width/getCameraW()*getCameraH());
+		}
+		else
+		{
+			h=height;
+			w=(unsigned int)round((double)height/getCameraH()*getCameraW());
+		}
+	}
+
+	if ((w==internalWidth&&h==internalHeight)&&(frameBuffer&&frameBufferTexture&&frameBufferDepth))
+	return;
+
+	if (frameBuffer)
+	{
+		glDeleteFramebuffers(1,&frameBuffer);
+		frameBuffer=0;
+		EngineLayer::printGLErrors("Clear internal resolution buffer");
+	}
+	if (frameBufferTexture)
+	{
+		glDeleteTextures(1,&frameBufferTexture);
+		frameBufferTexture=0;
+		EngineLayer::printGLErrors("Clear internal resolution texture");
+	}
+	if (frameBufferDepth)
+	{
+		glDeleteRenderbuffers(1,&frameBufferDepth);
+		frameBufferDepth=0;
+		EngineLayer::printGLErrors("Clear internal resolution depth");
+	}
+	
+	internalWidth=w;
+	internalHeight=h;
+
+	glGenFramebuffers(1,&frameBuffer);
+	EngineLayer::printGLErrors("Internal resolution buffer creation");
+	glBindFramebuffer(GL_FRAMEBUFFER,frameBuffer);
+	EngineLayer::printGLErrors("Internal resolution buffer bind");
+		
+	glGenRenderbuffers(1,&frameBufferDepth);
+	EngineLayer::printGLErrors("Internal resolution depth creation");
+	glBindRenderbuffer(GL_RENDERBUFFER,frameBufferDepth);
+	EngineLayer::printGLErrors("Internal resolution depth bind");
+	glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT,internalWidth,internalHeight);
+	EngineLayer::printGLErrors("Internal resolution depth store");
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,frameBufferDepth);
+	EngineLayer::printGLErrors("Internal resolution depth");
+
+	_engine::generateTexture(&frameBufferTexture,internalWidth,internalHeight,NULL,GL_RGBA,0);
+
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER)!=GL_FRAMEBUFFER_COMPLETE)
+	{
+		Log::error("Graphics",std::string("Failed to setup internal resolution (")+to_string(internalWidth)+","+to_string(internalHeight)+") "+(userResolution?"on demand":"automatically"));
 	}
 }
 
@@ -683,8 +762,6 @@ void EngineLayer::reapplyGL()
 
 void EngineLayer::initGL()
 {
-	updateDefaultTexture();
-
 	#ifndef ANDROID
 	glewExperimental=TRUE;
 	GLenum result=glewInit();
@@ -699,7 +776,9 @@ void EngineLayer::initGL()
 	#endif
 	printGLErrors("Glew initialization");
 	#endif
-
+	
+	updateDefaultTexture();
+	
 	drawProgram=glProgram(VERTEX_SHADER,FRAGMENT_SHADER);
 	printGLErrors("GL program");
 	drawTrans=glGetUniformLocation(drawProgram,"ftrans");
@@ -720,8 +799,14 @@ void EngineLayer::initGL()
 	printGLErrors("GL var ftextured");
 	drawHalfSize=glGetUniformLocation(drawProgram,"fhalfsize");
 	printGLErrors("GL var fhalfsize");
-	glViewport(0,0,width,height);
+
+	glViewport(0,0,internalWidth,internalHeight);
 	printGLErrors("GL viewport");
+	
+	internalProgram=glProgram(VERTEX_SHADER_INTERNAL_OUT,FRAGMENT_SHADER_INTERNAL_OUT);
+	printGLErrors("GL internal out program");
+	internalDrawTex=glGetUniformLocation(internalProgram,"ftex");
+	printGLErrors("GL internal out var ftex");
 }
 
 GLuint EngineLayer::glProgram(const char* vShader,const char* fShader)
@@ -802,6 +887,9 @@ void EngineLayer::setCamera(Camera *cam)
 		activeCamera=defaultCamera;
 		else
 		activeCamera=cam;
+		
+		if (!userResolution)
+		setupInternalResolution(0);
 	}
 }
 
@@ -814,6 +902,9 @@ void EngineLayer::setSize(int w,int h)
 	updateRatios();
 	
 	refreshCamera();
+
+	if (!userResolution)
+	setupInternalResolution(0);
 
 	reapplyGL();
 }
@@ -829,38 +920,24 @@ void EngineLayer::updateRatios()
 void EngineLayer::setRenderSize()
 {
 	queueCamera=0;
-
-	glViewport(0,0,width,height);
+	
 	DEBUGFUNC(printGLErrors("GL viewport size"));
 	
-	if (blackBars)
+	setOrtho(0,0,(GLfloat)activeCamera->getWidth(),(GLfloat)activeCamera->getHeight());
+
+	if (((double)internalWidth/(double)internalHeight)>((double)width/(double)height))
 	{
-		double camRatio=activeCamera->getWidth()/activeCamera->getHeight();
-		double winRatio=(double)width/(double)height;
-		if (camRatio>winRatio)
-		{
-			regionW=activeCamera->getWidth();
-			regionH=regionW/winRatio;
-			verBars=(regionH-activeCamera->getHeight())/2.0f;
-			horBars=0;
-		}
-		else
-		{
-			regionH=activeCamera->getHeight();
-			regionW=regionH*winRatio;
-			verBars=0;
-			horBars=(regionW-activeCamera->getWidth())/2.0f;
-		}
-		setOrtho(0,0,(GLfloat)regionW,(GLfloat)regionH);
-		DEBUGFUNC(printGLErrors("GL ortho"));
+		internalSquareData[2]=internalSquareData[6]=1;
+		internalSquareData[5]=internalSquareData[7]=(GLfloat)(((double)internalHeight/(double)internalWidth)/((double)height/(double)width));
 	}
 	else
 	{
-		setOrtho(0,0,(GLfloat)activeCamera->getWidth(),(GLfloat)activeCamera->getHeight());
-		DEBUGFUNC(printGLErrors("GL ortho"));
-		regionW=activeCamera->getWidth();
-		regionH=activeCamera->getHeight();
+		internalSquareData[2]=internalSquareData[6]=(GLfloat)(((double)internalWidth/(double)internalHeight)/((double)width/(double)height));
+		internalSquareData[5]=internalSquareData[7]=1;
 	}
+
+	internalSquareData[0]=internalSquareData[4]=-internalSquareData[6];
+	internalSquareData[1]=internalSquareData[3]=-internalSquareData[7];
 }
 
 double EngineLayer::getCameraX()
@@ -882,40 +959,36 @@ double EngineLayer::getCameraH()
 
 double EngineLayer::getKeyboardSize()
 {
-	double move=-screenoff/(double)height*regionH;
-	if (verBars*2<move)
+	double move=-screenoff/(double)height*getCameraH()/getVerRatio();
+	/*if (verBars*2<move)
 	move-=verBars;
 	else
 	if (move>=verBars)
-	move=verBars;
+	move=verBars;*/
 
 	return move;
 }
 
 void EngineLayer::drawBegin()
 {
-
 	if (queueCamera)
-	setRenderSize();
+	{
+		if (!userResolution)
+		setupInternalResolution(0);
+		setRenderSize();
+	}
 
-	posOffset[0]=(GLfloat)(activeCamera->x-horBars);
-
-	double move=-screenoff/(double)height*regionH;
-	if (verBars*2<move)
-	move-=verBars;
-	else
-	if (move>=verBars)
-	move=verBars;
-	posOffset[1]=(GLfloat)(activeCamera->y-verBars-move);
+	posOffset[0]=(GLfloat)activeCamera->x;
+	posOffset[1]=(GLfloat)activeCamera->y;
 	halfsize[0]=halfsize[1]=0;
-
-	#ifndef ANDROID
-	//if (window)
-	//window->clear();
-	#endif
-	glClearColor(r,g,b,1.0f);
+	
+	/*FRAME BUFFER*/
+	glBindFramebuffer(GL_FRAMEBUFFER,frameBuffer);
+	DEBUGFUNC(printGLErrors("Draw bind internal frame buffer"));
+	glClearColor(r,g,b,0.0f);//transparent buffer
 	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
-	DEBUGFUNC(printGLErrors("Draw clear"));
+	DEBUGFUNC(printGLErrors("Draw buffer clear"));
+
 	glUseProgram(drawProgram);
 	DEBUGFUNC(printGLErrors("Draw program"));
 	glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,0,squareData);
@@ -939,33 +1012,58 @@ void EngineLayer::drawBegin()
 	glEnableVertexAttribArray(1);
 	DEBUGFUNC(printGLErrors("Draw attrib 2"));
 	printGLErrors("Draw begin");
+	
+	#ifdef ANDROID
+	glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,frameBufferTexture,0);//shader index 0
+	#else
+	glFramebufferTexture(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,frameBufferTexture,0);//shader index 0
+	#endif
+	EngineLayer::printGLErrors("Draw begin resolution buffer");
+	#ifndef ANDROID
+	glDrawBuffers(1,drawBuffers);
+	#endif
+	EngineLayer::printGLErrors("Draw begin resolution draw buffer");
+	
+	glViewport(0,0,internalWidth,internalHeight);
 }
 
 void EngineLayer::drawEnd()
 {
-	if (blackBars)
-	{
-		double move=-screenoff/(double)height*regionH;
-		if (verBars*2<move)
-		move-=verBars;
-		else
-		if (move>=verBars)
-		move=verBars;
+	glViewport(0,0,width,height);
+		
+	glBindFramebuffer(GL_FRAMEBUFFER,0);
+	DEBUGFUNC(printGLErrors("Draw internal remove buffer"));
+		
+	glUseProgram(internalProgram);
+	DEBUGFUNC(printGLErrors("Draw internal program"));
+		
+	glClearColor(r,g,b,1.0f);
+	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+	
+	GLfloat move=screenoff/(GLfloat)height*2.0f; //(*2 because range -1 to 1)
+	internalSquareData[1]+=move;
+	internalSquareData[3]+=move;
+	internalSquareData[5]+=move;
+	internalSquareData[7]+=move;
+	glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,0,internalSquareData);
+	DEBUGFUNC(printGLErrors("Draw internal square"));
+	glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,0,internalTexData);
+	DEBUGFUNC(printGLErrors("Draw internal data"));
+		
+	printGLErrors("Draw internal frame buffer1");
+	glActiveTexture(GL_TEXTURE0);
+	printGLErrors("Draw internal frame buffer2");
+	glBindTexture(GL_TEXTURE_2D,frameBufferTexture);
+	printGLErrors("Draw internal frame buffer3");
+	glUniform1i(internalDrawTex,0);
+	printGLErrors("Draw internal frame buffer4");
 
-		posOffset[0]=0;
-		posOffset[1]=-(GLfloat)move;
-		glUniform2fv(drawOffset,1,posOffset);
-		if (horBars>verBars)
-		{
-			drawRectangle(0,0,horBars,regionH,0,0,0,0,1);
-			drawRectangle(regionW-horBars,0,horBars,regionH,0,0,0,0,1);
-		}
-		else
-		{
-			drawRectangle(0,0,regionW,verBars,0,0,0,0,1);
-			drawRectangle(0,regionH-verBars,regionW,verBars,0,0,0,0,1);
-		}
-	}
+	glDrawArrays(GL_TRIANGLE_STRIP,0,4);
+	printGLErrors("Draw internal frame buffer");
+	internalSquareData[1]-=move;
+	internalSquareData[3]-=move;
+	internalSquareData[5]-=move;
+	internalSquareData[7]-=move;
 
 	#ifndef ANDROID
 	if (window)
@@ -980,7 +1078,7 @@ void EngineLayer::printGLErrors(std::string pos)
 	#ifdef DEBUG
 	pos+=" error: ";
 	GLenum result=glGetError();
-	while (result!=GL_NO_ERROR)
+	if (result!=GL_NO_ERROR)
 	{
 		#ifdef ANDROID
 		//todo ERRORSTR
@@ -1046,7 +1144,6 @@ void EngineLayer::unlistLoadedFont(Font *s)
 
 double EngineLayer::getScreenRatio()
 {
-	//if (blackbars)
 	return dominantRatio?widthRatio:heightRatio;
 }
 
@@ -1496,15 +1593,15 @@ void EngineLayer::parseTouchables()
 	
 	for(std::vector<Touchable*>::iterator it=touchables.begin();it!=touchables.end();++it)
 	{
+		(*it)->fixPosition();//ok to have this above if's?
 		if ((*it)->pointer==NULL||(*it)->pointer->isRunEnabled())
 		if ((*it)->mouse!=-1)
 		{
 			if (getMouseIdle((*it)->mouse))
 			(*it)->hook(-1);
 			else
-			(*it)->inside=(getMouseTranslatedX((*it)->mouse)>=(*it)->x&&getMouseTranslatedX((*it)->mouse)<(*it)->x+(*it)->w&&getMouseTranslatedY((*it)->mouse)>=(*it)->y&&getMouseTranslatedY((*it)->mouse)<(*it)->y+(*it)->h);
+			(*it)->inside=(getMouseTranslatedX((*it)->mouse)>=(*it)->getX()&&getMouseTranslatedX((*it)->mouse)<(*it)->getX()+(*it)->w&&getMouseTranslatedY((*it)->mouse)>=(*it)->getY()&&getMouseTranslatedY((*it)->mouse)<(*it)->getY()+(*it)->h);
 		}
-		(*it)->fixPosition();
 	}
 	
 	int t;
@@ -1518,7 +1615,7 @@ void EngineLayer::parseTouchables()
 		for(std::vector<Touchable*>::iterator it=touchables.begin();it!=touchables.end();++it)
 		if ((*it)->enabled)
 		if (((*it)->mouse==-1)&&(touch==NULL||touch->getDepth()>(*it)->getDepth()))
-		if (getMouseTranslatedX(t)>=(*it)->x&&getMouseTranslatedX(t)<(*it)->x+(*it)->w&&getMouseTranslatedY(t)>=(*it)->y&&getMouseTranslatedY(t)<(*it)->y+(*it)->h)
+		if (getMouseTranslatedX(t)>=(*it)->getX()&&getMouseTranslatedX(t)<(*it)->x+(*it)->w&&getMouseTranslatedY(t)>=(*it)->getY()&&getMouseTranslatedY(t)<(*it)->getY()+(*it)->h)
 		touch=(*it);
 		
 		if (touch!=NULL)

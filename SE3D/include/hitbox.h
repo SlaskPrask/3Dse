@@ -64,7 +64,7 @@ namespace _engineprivate
 		//virtual int inside(const double& px,const double& py,const double& px2,const double& py2) const;
 
 		public:
-		~Hitbox();
+		virtual ~Hitbox();
 		double getRight();
 		double getTop();
 		double getLeft();

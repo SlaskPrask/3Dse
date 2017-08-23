@@ -54,6 +54,6 @@ namespace _ENGINESPACE
 		public:
 		Font();
 		Font(const std::string &file,int s=_FONT_DEFAULT_SIZE,unsigned int numchars=_FONT_SET_CHARACTERS,bool smoothed=1,volatile bool threaded=0);
-		~Font();
+		virtual ~Font();
 	};
 }

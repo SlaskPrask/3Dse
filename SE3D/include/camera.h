@@ -21,24 +21,8 @@ namespace _ENGINESPACE
 		const double *xfollow,*yfollow;
 		void doFollow();
 		void init();
-		inline void checkXLimits()
-		{
-			if (limits)
-			if (x<limitsLeft)
-			x=limitsLeft;
-			else
-			if(x+w>limitsRight)
-			x=limitsRight-w;
-		}
-		inline void checkYLimits()
-		{
-			if (limits)
-			if (y<limitsTop)
-			y=limitsTop;
-			else
-			if(y+h>limitsBottom)
-			y=limitsBottom-h;
-		}
+		void checkXLimits();
+		void checkYLimits();
 		
 		public:
 		double x,y;
@@ -148,7 +132,7 @@ namespace _ENGINESPACE
 			limits=0;
 		}
 		
-		~Camera();
+		virtual ~Camera();
 	};
 }
 

@@ -23,7 +23,7 @@ namespace _engineprivate
 
 		public:
 		Loader();
-		~Loader();
+		virtual ~Loader();
 		void add(ResourceSet *set);
 		void clear();
 		bool load();

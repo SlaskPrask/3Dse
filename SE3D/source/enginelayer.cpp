@@ -308,16 +308,11 @@ void EngineLayer::eventParser()
 		{
 			//could ignore this if the "if"'s in cases fail
 			mouseX[me.which]=me.x;
-			mouseY[me.which]=me.y-(int)(getKeyboardSize()/getRegionH()*(double)getHeight());
-			if (getCameraW()==getWidth())
-			mouseTX[me.which]=getCameraX()+(double)mouseX[me.which];
-			else
-			mouseTX[me.which]=-getHorBar()+getCameraX()+(double)mouseX[me.which]/(double)getWidth()*getRegionW();
+			mouseY[me.which]=me.y+(int)screenoff;
 
-			if (getCameraH()==getHeight())
-			mouseTY[me.which]=getCameraY()+(double)mouseY[me.which];
-			else
-			mouseTY[me.which]=-getVerBar()+getCameraY()+(double)mouseY[me.which]/(double)getHeight()*getRegionH();
+			mouseTX[me.which]=((double)mouseX[me.which]/(double)getWidth()-(1.0f-getHorRatio())/2.0f)/getHorRatio()*getCameraW()+getCameraX();
+
+			mouseTY[me.which]=((double)mouseY[me.which]/(double)getHeight()-(1.0f-getVerRatio())/2.0f)/getVerRatio()*getCameraH()+getCameraY();
 
 			switch (me.type)
 			{

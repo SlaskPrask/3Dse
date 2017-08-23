@@ -6,10 +6,22 @@
 #include <string>
 #include "resource.h"
 
+
+namespace _ENGINESPACE
+{
+	class ResourceSet;
+	struct _SetPointer;
+}
+
 namespace _engineprivate
 {
 	class EngineLayer;
 	class Loader;
+	class _SetHelper
+	{
+		public:
+		static void assign(_SetPointer *pointer,ResourceSet *set);
+	};
 }
 
 namespace _ENGINESPACE
@@ -17,6 +29,7 @@ namespace _ENGINESPACE
 	class ResourceSet
 	{
 		friend class _engineprivate::EngineLayer;
+		friend struct _SetPointer;
 		
 		private:
 		std::vector<Resource*> sprites;
@@ -47,7 +60,7 @@ namespace _ENGINESPACE
 		
 		public:
 		ResourceSet();
-		~ResourceSet();
+		virtual ~ResourceSet();
 		Resource* addSprite(const std::string &s,bool smoothed=1);
 		inline Resource* addSpriteSharp(const std::string &s)
 		{
@@ -55,9 +68,13 @@ namespace _ENGINESPACE
 		}
 		Resource* addSound(const std::string &s,bool stream=0);
 		Resource* addMusic(const std::string &s);
-		Resource* addFont(const std::string &s,int sz=_FONT_DEFAULT_SIZE,unsigned int characters=_FONT_SET_CHARACTERS);
+		Resource* addFont(const std::string &s,int sz=_FONT_DEFAULT_SIZE,unsigned int characters=_FONT_SET_CHARACTERS,bool smoothed=1);
 		void load(volatile bool threaded=0,volatile unsigned int *counter=NULL,volatile bool *quitter=0,Loader *loader=0);
 		void unload();
+		inline unsigned int id()
+		{
+			return engine_id;
+		}
 		inline Sprite* getSprite(unsigned int i)
 		{
 			if (i<0||i>=sprites.size())
@@ -95,6 +112,22 @@ namespace _ENGINESPACE
 		inline bool isLoaded()
 		{
 			return loads>=1;
+		}
+	};
+
+	struct _SetPointer
+	{
+		friend class _engineprivate::_SetHelper;
+		protected:
+		ResourceSet *_s=NULL;
+		public:
+		operator unsigned int()
+		{
+			return _s->engine_id;
+		}
+		operator ResourceSet*()
+		{
+			return _s;
 		}
 	};
 }

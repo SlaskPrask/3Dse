@@ -50,7 +50,7 @@ namespace _engineprivate
 			firstNode=0;
 			lastNode=0;
 		}
-		~ListHandle()
+		virtual ~ListHandle()
 		{
 			if (firstNode)
 			firstNode->_removeHandleDown();

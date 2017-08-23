@@ -22,7 +22,7 @@ namespace _engineprivate
 		template<class O,class T>
 		static void registerParent(void *oc)
 		{
-			O::_registerParent<O,T>(oc);
+			O::template _registerParent<O,T>(oc);
 		}
 		template<class T>
 		static void add(Object *o)
@@ -63,7 +63,7 @@ namespace _engineprivate
 		{
 			_ObjectInheritanceHelper::remove<T>(o);
 		}
-		~_ObjectChildDefinition()
+		virtual ~_ObjectChildDefinition()
 		{
 			//TODO unregister
 		}

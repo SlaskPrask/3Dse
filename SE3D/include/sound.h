@@ -41,6 +41,6 @@ namespace _ENGINESPACE
 			return file;
 		}
 		
-		~Sound();
+		virtual ~Sound();
 	};
 }

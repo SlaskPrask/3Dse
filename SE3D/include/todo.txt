@@ -67,8 +67,6 @@ multishader support
  etc
  and compose all
 
-tweak inheritance to only cpp (wish it was h)
-
 hidden assets
 resource compiler
  combine to one file

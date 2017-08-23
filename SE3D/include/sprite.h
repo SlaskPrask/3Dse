@@ -47,6 +47,6 @@ namespace _ENGINESPACE
 		{
 			return h;
 		}
-		~Sprite();
+		virtual ~Sprite();
 	};
 }

@@ -51,10 +51,10 @@ Resource* ResourceSet::addMusic(const std::string &s)
 	return addSound(s,1);
 }
 
-Resource* ResourceSet::addFont(const std::string &s,int sz,unsigned int characters)
+Resource* ResourceSet::addFont(const std::string &s,int sz,unsigned int characters,bool smoothed)
 {
 	Resource *r=new Resource();
-	r->setFont(s,sz,characters);
+	r->setFont(s,sz,characters,smoothed);
 	fonts.push_back(r);
 	return r;
 }
@@ -128,4 +128,9 @@ void ResourceSet::_unload(bool forced)
 	else
 	if (!forced)
 	Log::notify("Engine","Attempting to unload an already unloaded set "+to_string(engine_id)+"("+to_string(this)+")");
+}
+
+void _SetHelper::assign(_SetPointer *pointer,ResourceSet *set)
+{
+	pointer->_s=set;
 }

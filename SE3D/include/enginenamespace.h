@@ -83,11 +83,11 @@ namespace _ENGINESPACE
 	{
 		EngineLayer::instance()->loaderAdd(set);
 	}
-	inline void loaderAdd(unsigned int i)
+	inline void loaderAddId(unsigned int i)
 	{
 		EngineLayer::instance()->loaderAdd(EngineLayer::instance()->resourceSet(i));
 	}
-	inline void loaderAdd(int i)
+	inline void loaderAddId(int i)
 	{
 		EngineLayer::instance()->loaderAdd(EngineLayer::instance()->resourceSet(i));
 	}
@@ -225,6 +225,14 @@ namespace _ENGINESPACE
 	inline ResourceSet* resourceSet(unsigned int i)
 	{
 		return getResourceSet(i);
+	}
+	inline void setInternalResolution(unsigned int w,unsigned int h)
+	{
+		EngineLayer::instance()->setupInternalResolution(1,w,h);
+	}
+	inline void unsetInternalResolution()
+	{
+		EngineLayer::instance()->setupInternalResolution(0);
 	}
 	inline void getTextSize(Font *font,const std::string &str,double size,double *w,double *h,double lineSpacing=0)
 	{

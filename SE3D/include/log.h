@@ -39,7 +39,7 @@ namespace _engineprivate
 			static Log loghandler;
 			return &loghandler;
 		}
-		~Log();
+		virtual ~Log();
 
 		static void enablePrint();
 		static void disablePrint();

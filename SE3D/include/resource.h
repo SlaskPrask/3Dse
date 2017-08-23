@@ -9,12 +9,22 @@
 
 namespace _ENGINESPACE
 {
-	class ResourceSet;
+	class Resource;
+	struct _ResPointer;
 }
 
 namespace _engineprivate
 {
-	using namespace _ENGINESPACE;
+	class _ResHelper
+	{
+		public:
+		static void assign(_ResPointer *pointer,Resource *res);
+	};
+}
+
+namespace _ENGINESPACE
+{
+	class ResourceSet;
 	
 	class Resource
 	{
@@ -35,10 +45,10 @@ namespace _engineprivate
 		
 		public:
 		Resource();
-		~Resource();
+		virtual ~Resource();
 		void setSprite(const std::string &s,bool smoothed);
 		void setSound(const std::string &s,bool stream);
-		void setFont(const std::string &s,int sz=_FONT_DEFAULT_SIZE,unsigned int chars=_FONT_SET_CHARACTERS);
+		void setFont(const std::string &s,int sz=_FONT_DEFAULT_SIZE,unsigned int chars=_FONT_SET_CHARACTERS,bool smoothed=1);
 		void setEmpty();
 		inline std::string getFile()
 		{
@@ -56,18 +66,40 @@ namespace _engineprivate
 		{
 			return static_cast<Font*>(data);
 		}
-		
-		operator Sprite*() const
+	};
+
+	struct _ResPointer
+	{
+		friend class _engineprivate::_ResHelper;
+		protected:
+		Resource *_r=NULL;
+		const unsigned int _id;
+
+		public:
+		_ResPointer(unsigned int i):_id(i){}
+		inline unsigned int id()
 		{
-			return static_cast<Sprite*>(data);
+			return _id;
 		}
-		operator Sound*() const
+		operator Sprite*()
 		{
-			return static_cast<Sound*>(data);
+			return _r->getSprite();
 		}
-		operator Font*() const
+		operator Sound*()
 		{
-			return static_cast<Font*>(data);
+			return _r->getSound();
+		}
+		operator Font*()
+		{
+			return _r->getFont();
+		}
+		operator unsigned int()
+		{
+			return _id;
+		}
+		_ResPointer* operator->()
+		{
+			return this;
 		}
 	};
 }

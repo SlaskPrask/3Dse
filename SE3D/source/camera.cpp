@@ -83,7 +83,7 @@ void Camera::doFollow()
 		
 		if (boundsTop+boundsBottom>=h)
 		{
-			h=*yfollow-h/2.0f;
+			y=*yfollow-h/2.0f;
 			checkYLimits();
 		}
 		else
@@ -98,6 +98,35 @@ void Camera::doFollow()
 			y=*yfollow-h+boundsBottom;
 			checkYLimits();
 		}
+	}
+}
+
+void Camera::checkXLimits()
+{
+	if (limits)
+	{
+		if (limitsRight-limitsLeft<w)
+		x=(limitsRight+limitsLeft-w)/2;
+		else
+		if (x<limitsLeft)
+		x=limitsLeft;
+		else
+		if(x+w>limitsRight)
+		x=limitsRight-w;
+	}
+}
+void Camera::checkYLimits()
+{
+	if (limits)
+	{
+		if (limitsBottom-limitsTop<h)
+		y=(limitsBottom+limitsTop-h)/2;
+		else
+		if (y<limitsTop)
+		y=limitsTop;
+		else
+		if(y+h>limitsBottom)
+		y=limitsBottom-h;
 	}
 }
 
